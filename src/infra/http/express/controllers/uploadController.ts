@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { PublishNotesUseCase } from '../../../../application/usecases/PublishNotesUseCase';
 import { UploadNotesRequestSchema } from '../dto/UploadNotesDto';
 import { mapNoteDtoToDomain } from '../mappers/noteMapper';
-import { Note } from 'domain/entities/Note';
+import { Note } from '../../../../domain/entities/Note';
 
 export function createUploadController(useCase: PublishNotesUseCase) {
   return async function uploadController(req: Request, res: Response) {

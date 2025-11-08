@@ -1,0 +1,19 @@
+services:
+  personal-publish:
+    build: .
+    container_name: personal-publish
+    restart: unless-stopped
+
+    # Fichier .env spécifique au conteneur (non commité)
+    env_file:
+      - .env.docker
+
+    environment:
+      NODE_ENV: production
+
+    # Volume pour que Nginx voie les fichiers générés
+    volumes:
+      - /srv/personal-publish/site:/var/www/personal-publish/site
+
+    ports:
+      - '127.0.0.1:3000:3000'
