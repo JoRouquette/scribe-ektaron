@@ -1,5 +1,6 @@
 <section class="home" aria-live="polite">
   <h1>Index</h1>
+  <p>Bienvenue sur votre site de lore.</p>
 
   <form class="search" (submit)="$event.preventDefault()">
     <label class="sr-only" for="q">Rechercher</label>
@@ -15,25 +16,21 @@
   </form>
 
   @if (facade.error()) {
-    <p class="error">{{ facade.error() }}</p>
+  <p class="error">{{ facade.error() }}</p>
+  } @else { @if (facade.loading()) {
+  <p>Chargement…</p>
+  } @else { @if (facade.results().length === 0) {
+  <p>Aucun résultat.</p>
   } @else {
-    @if (facade.loading()) {
-      <p>Chargement…</p>
-    } @else {
-      @if (facade.results().length === 0) {
-        <p>Aucun résultat.</p>
-      } @else {
-        <ul class="list" role="list">
-          @for (p of facade.results(); track p.slug.value) {
-            <li>
-              <a [routerLink]="['/p', p.slug.value]">{{ p.title }}</a>
-              @if (p.tags.length) {
-                <small>— {{ p.tags.join(', ') }}</small>
-              }
-            </li>
-          }
-        </ul>
+  <ul class="list" role="list">
+    @for (p of facade.results(); track p.slug.value) {
+    <li>
+      <a [routerLink]="['/p', p.slug.value]">{{ p.title }}</a>
+      @if (p.tags.length) {
+      <small>— {{ p.tags.join(', ') }}</small>
       }
+    </li>
     }
-  }
+  </ul>
+  } } }
 </section>
