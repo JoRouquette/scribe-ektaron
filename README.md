@@ -1,156 +1,127 @@
-# scribe-ektaron / personal-publish
+# scribe-ektaron
 
-`personal-publish` is a small self-hostable backend designed to receive notes from Obsidian (or any client), render them to static HTML, and publish them to a directory that can be served directly by Nginx.
+**scribe-ektaron** is a small, self-hostable publishing stack made of two apps:
 
-The goal is simple:
+- **personal-publish** — a **Node.js + TypeScript** backend that receives Markdown notes (e.g., from Obsidian), renders them to HTML, writes them to a shared `/content` folder, and generates a machine-readable **\_manifest.json**.
+- **publish-frontend** — an **Angular (v18+) SPA** that reads `_manifest.json`, provides **dynamic routing** (`/p/:slug`), **search**, and fetches the generated HTML for display with a clean, themeable layout.
 
-> **Push Markdown from your vault → get a styled static site generated on your VPS.**
+> **Push Markdown from your vault → browse a styled site on your VPS.**
+>
+> No manual Nginx config per folder: the **frontend uses the manifest** to know what to display.
 
-This repository contains:
-
-- a **Node.js + TypeScript** backend (`personal-publish`),
-- a **clean architecture** layout (domain / application / infra),
-- a **Docker** setup for easy deployment,
-- examples for **Nginx** and an optional **private Docker registry**.
+The repository includes a **Clean Architecture** layout on both sides, a **Docker** setup to ship a single container, and optional **Nginx**/registry recipes.
+**Bundle name** (image/service) remains **`scribe-ektaron`**.
 
 ## Features
 
-- `GET /api/ping` – healthcheck endpoint.
-- `POST /api/upload` – upload a batch of notes:
-  - Authenticated via `x-api-key`.
-  - JSON payload containing notes (Markdown + frontmatter).
-  - Server-side Markdown → HTML rendering.
-  - Server-side HTML sanitization basics (no raw HTML in markdown, configurable later).
-  - Page templating with a consistent, minimal dark theme.
-  - Each route is published as `CONTENT_ROOT/<route...>/index.html`.
-  - Automatic generation of:
-    - a global `index.html` (site summary),
-    - a `_manifest.json` with all published pages.
+### Backend — `personal-publish`
 
-Intended use-case: an Obsidian plugin that preprocesses/sanitizes notes, then POSTs them to this API.
+- `GET /api/ping` — JSON healthcheck.
+- `POST /api/upload` — batch upload of notes (Markdown + frontmatter) authenticated by `x-api-key`.
+- Markdown → HTML server-side via **markdown-it** (extensible).
+- (Basic) HTML sanitization policy server-side (no raw HTML passthrough; configurable).
+- Page templating (minimal dark theme; meta tags; semantic HTML).
+- Filesystem publishing:
 
-## Architecture Overview
+  - Writes **HTML** under **`CONTENT_ROOT`**.
+  - Maintains **`CONTENT_ROOT/_manifest.json`**.
+  - (Optional) Generates a **`CONTENT_ROOT/index.html`** summary.
 
-The project follows a Clean Architecture / Hexagonal style:
+- Idempotent per `route`: re-upload replaces the same page and updates the index.
 
-```text
-src/
-  domain/
-    entities/
-      Note.ts
-      PublishedPage.ts
-  application/
-    ports/
-      MarkdownRendererPort.ts
-      ContentStoragePort.ts
-      SiteIndexPort.ts
-    usecases/
-      PublishNotesUseCase.ts
-  infra/
-    http/
-      express/
-        app.ts
-        controllers/
-        dto/
-        mappers/
-        middleware/
-    filesystem/
-      FileSystemContentStorage.ts
-      FileSystemSiteIndex.ts
-    markdown/
-      MarkdownItRenderer.ts
-    config/
-      EnvConfig.ts
-  shared/
-    errors/
-      DomainError.ts
-  main.ts
+### Frontend — `publish-frontend`
+
+- Angular **v18** standalone, signals, **`@if` / `@for`** templates, SCSS.
+- Reads **`/content/_manifest.json`** and builds:
+
+  - Dynamic routes: **`/p/:slug`** (manifest-driven).
+  - **Search** (title + tags).
+  - **Viewer** that fetches the generated HTML at `filePath`.
+
+- Lightweight, accessible UI; easy theming.
+- Clean Architecture (domain / application / infrastructure / presentation).
+- Works behind a single Node/Express server that serves:
+
+  - `/api/**` (backend),
+  - `/content/**` (generated HTML),
+  - `/` (Angular build) with **SPA fallback**.
+
+## Monorepo Layout
+
+```
+.
+├── apps/
+│   ├── backend/                     # personal-publish
+│   │   ├── package.json
+│   │   ├── tsconfig.json
+│   │   └── src/
+│   │       ├── domain/
+│   │       │   └── entities/        # Note.ts, PublishedPage.ts
+│   │       ├── application/
+│   │       │   ├── ports/           # MarkdownRendererPort.ts, ContentStoragePort.ts, SiteIndexPort.ts
+│   │       │   └── usecases/        # PublishNotesUseCase.ts
+│   │       ├── infra/
+│   │       │   ├── config/          # EnvConfig.ts
+│   │       │   ├── filesystem/      # FileSystemContentStorage.ts, FileSystemSiteIndex.ts, SiteIndexTemplates.ts
+│   │       │   └── http/
+│   │       │       └── express/     # app.ts, controllers/, dto/, mappers/, middleware/
+│   │       ├── shared/              # errors/DomainError.ts
+│   │       └── main.ts
+│   └── frontend/                    # publish-frontend (Angular v18)
+│       ├── package.json
+│       ├── angular.json
+│       └── src/
+│           ├── domain/              # pure TS: models, value-objects, ports
+│           ├── application/         # usecases, facades (signals)
+│           ├── infrastructure/      # http repositories, DTOs, mappers
+│           └── presentation/        # routes, pages (home, viewer), app.config.ts
+├── content/                         # shared R/W volume (generated HTML + _manifest.json)
+│   ├── _manifest.json
+│   └── ...
+├── Dockerfile
+├── docker-compose.yml
+├── .env.example
+├── README.md
+└── (tests in /test remain; Vitest)
 ```
 
-- **Domain**: pure business entities (`Note`, `PublishedPage`), no HTTP/FS/Express/Docker.
-- **Application**: use cases (`PublishNotesUseCase`) + ports (interfaces).
-- **Infra**: adapters (Express controllers, filesystem, markdown renderer, env config).
-- **Main**: composition root (wires adapters and use cases, starts HTTP server).
+## Clean Architecture
 
-## Requirements
+### Backend (Node/Express)
 
-For local development:
+- **Domain** — pure entities (`Note`, `PublishedPage`), no IO.
+- **Application** — use cases (`PublishNotesUseCase`) and **ports** (`MarkdownRendererPort`, `ContentStoragePort`, `SiteIndexPort`).
+- **Infra** — adapters (Express controllers, FS, Markdown renderer, env).
+- **Main** — composition root (wire deps, start HTTP server).
 
-- Node.js 20+
-- npm
-- (Optional but recommended) Docker + docker compose v2
-- Nginx for serving static content in production
+### Frontend (Angular)
 
-## Installation (Local Development)
+- **domain** — models, value-objects (e.g., `Slug`), and ports (`ManifestRepository`, `HtmlGateway`) **without Angular**.
+- **application** — orchestration/use-cases (`LoadManifest`, `FindPage`, `SearchPages`) + a **Facade** (signals).
+- **infrastructure** — Angular **HttpClient** implementations of domain ports + DTO→domain mapping.
+- **presentation** — components/routes only; no business logic, only binds the Facade.
 
-Clone the repository:
-
-```bash
-git clone https://github.com/JoRouquette/scribe-ektaron.git
-cd scribe-ektaron
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-### Environment variables
-
-Create a `.env` file at the root:
-
-```bash
-cat > .env << 'EOF'
-PORT=3000
-API_KEY=dev-key-local
-CONTENT_ROOT=./tmp/site
-NODE_ENV=development
-EOF
-```
-
-> `.env` is ignored by git. You can also create a `.env.example` for documentation.
-
-### Run in development
-
-```bash
-npm run dev
-```
-
-The server listens on `PORT` (default `3000`).
-
-Healthcheck:
-
-```bash
-curl http://localhost:3000/api/ping
-```
-
-Expected JSON example:
+> Angular path aliases (in `apps/frontend/tsconfig.json`):
 
 ```json
 {
-  "ok": true,
-  "service": "personal-publish",
-  "version": "1.0.0",
-  "timestamp": "2025-01-01T12:00:00.000Z"
+  "compilerOptions": {
+    "paths": {
+      "@domain/*": ["src/domain/*"],
+      "@application/*": ["src/application/*"],
+      "@infra/*": ["src/infrastructure/*"],
+      "@presentation/*": ["src/presentation/*"]
+    }
+  }
 }
 ```
 
-### Run tests
-
-This project uses **Vitest**.
-
-```bash
-npm run test
-```
-
-## API
+## API (backend)
 
 ### `GET /api/ping`
 
-- **Purpose**: healthcheck.
-- **Auth**: none.
-- **Response**:
+- **Auth**: none
+- **Response**
 
 ```json
 {
@@ -163,10 +134,9 @@ npm run test
 
 ### `POST /api/upload`
 
-- **Auth**: required, header `x-api-key: <your-api-key>`.
-- **Content-Type**: `application/json`.
-
-#### Request body
+- **Auth**: header `x-api-key: <your-api-key>`
+- **Content-Type**: `application/json`
+- **Body**
 
 ```json
 {
@@ -174,7 +144,7 @@ npm run test
     {
       "id": "uuid-or-other-id",
       "slug": "my-note-slug",
-      "route": "/blog/my-note",
+      "route": "/p/my-note-slug",
       "markdown": "# Title\n\nSome content...",
       "frontmatter": {
         "title": "My Note",
@@ -189,316 +159,352 @@ npm run test
 }
 ```
 
-Notes:
+**Behavior (per note)**
 
-- `route` must start with `/` (e.g. `/blog/my-note`).
-- `publishedAt` and `updatedAt` are ISO date strings (converted to `Date` on the server).
-- `frontmatter.title` is required.
+1. Validate payload (e.g., with **Zod**).
+2. Render Markdown → HTML via **markdown-it**.
+3. Wrap in the HTML template (title, meta, CSS, header link, etc.).
+4. Write to **`CONTENT_ROOT`** at **`filePath`** (see manifest contract below).
+   _If you use `route`, the conventional mapping is `CONTENT_ROOT/<segments>/index.html`._
+5. Update **`CONTENT_ROOT/_manifest.json`**; (optionally) update `CONTENT_ROOT/index.html`.
 
-#### Behavior
+**Responses**
 
-For each note:
+- Success
 
-1. Validate the payload structure (via Zod).
+```json
+{ "ok": true, "published": 1, "errors": [] }
+```
 
-2. Convert `markdown` → HTML using `markdown-it`.
+- Partial failure
 
-3. Wrap the HTML in a full page template:
-   - `<html lang="fr">` (or `en` depending on template),
-   - `<title>` from frontmatter,
-   - meta tags (description, keywords, publishedAt, updatedAt),
-   - consistent CSS (dark theme, readable layout),
-   - a simple header with a link back to `/`.
+```json
+{ "ok": false, "published": 1, "errors": [{ "noteId": "id", "message": "Error details..." }] }
+```
 
-4. Persist to filesystem:
-   - `CONTENT_ROOT` is defined by the env variable.
-   - `route` is mapped to `CONTENT_ROOT/<segments>/index.html`.
-   - Example: `route = "/blog/my-note"` → `CONTENT_ROOT/blog/my-note/index.html`.
+- Invalid payload → `400` with Zod details
+- Missing API key → `401`; wrong key → `403`
+- Server error → `500`
 
-5. Update the global index:
-   - Maintain `_manifest.json` in `CONTENT_ROOT`.
-   - Regenerate `CONTENT_ROOT/index.html` as a summary page listing all routes.
+## Manifest Contract (`/content/_manifest.json`)
 
-The operation is **idempotent** for a given route: re-uploading a note with the same `route` overwrites the previous page and updates the index.
-
-#### Response
-
-On success:
+Minimal fields consumed by the frontend:
 
 ```json
 {
-  "ok": true,
-  "published": 1,
-  "errors": []
+  "version": 1,
+  "generatedAt": "2025-11-10T10:00:00Z",
+  "pages": [
+    {
+      "route": "/p/mon-slug",
+      "slug": "mon-slug",
+      "title": "Titre de page",
+      "tags": ["t1", "t2"],
+      "filePath": "/content/notes/mon-slug/index.html",
+      "updatedAt": "2025-11-10T10:00:00Z"
+    }
+  ]
 }
 ```
 
-On partial failure:
+**Rules & invariants**
 
-```json
-{
-  "ok": false,
-  "published": 1,
-  "errors": [{ "noteId": "some-id", "message": "Error details..." }]
+- `version` — integer, manifest format version.
+- `generatedAt` — ISO 8601.
+- `pages[]` — each page:
+
+  - `route` — **must** start with `/p/` for SPA routing.
+  - `slug` — recommended (the frontend can derive it from `route` if missing).
+  - `title` — required.
+  - `tags` — array (can be empty).
+  - `filePath` — **absolute path from the host** as served by Express static under `/content` (e.g., `/content/.../index.html`).
+  - `updatedAt` — ISO 8601 (optional but useful).
+
+## Frontend Behavior (Angular)
+
+- **Load manifest** once from `GET /content/_manifest.json` (cached).
+- **Routes**
+
+  - `''` → Home (search + listing).
+  - `'p/:slug'` → Viewer; resolves the page by `slug` (or `route`) then fetches `filePath`.
+  - SPA **fallback** is handled by Express (see Docker section).
+
+- **Search** — case-insensitive filter on `title` and `tags`.
+- **Security** — HTML is expected to be safe (server-rendered). If you plan to accept unsafe user content, add client-side sanitization (e.g., DOMPurify) on top of the server policy.
+
+## Dev & Run
+
+### Requirements
+
+- Node.js **20+** (dev), npm
+- Docker + docker compose v2 (for containerized runs)
+
+### Env vars (root `.env`)
+
+```env
+PORT=3000
+API_KEY=dev-key-local
+CONTENT_ROOT=./content
+UI_ROOT=/ui
+API_PREFIX=/api
+NODE_ENV=development
+```
+
+### Local development (separate)
+
+Backend:
+
+```bash
+cd apps/backend
+npm install
+npm run dev
+# Exposes /api and serves /content + /ui if present
+```
+
+Frontend:
+
+```bash
+cd apps/frontend
+npm install
+npm start
+# http://localhost:4200
+```
+
+Smoke test (without backend):
+Create `content/_manifest.json` and an HTML page under `content/...` to validate the SPA locally. In containerized mode the backend will serve `/content` statically.
+
+### Tests
+
+```bash
+npm run test
+```
+
+(Vitest)
+
+## Build (no Docker)
+
+Backend:
+
+```bash
+cd apps/backend
+npm run build
+NODE_ENV=production PORT=3000 API_KEY=change-me CONTENT_ROOT=./content node dist/main.js
+```
+
+Frontend:
+
+```bash
+cd apps/frontend
+npm run build
+# outputs dist/ which will be served at / (copied to /ui in the container)
+```
+
+## Docker (single image: `scribe-ektaron`)
+
+The Dockerfile builds Angular + backend, then runs a **single Node process** that:
+
+- serves `/api/**`,
+- serves static **`/content/**`\*\* (volume),
+- serves Angular build at `/` with a **SPA fallback** to `index.html`.
+
+### Dockerfile (multi-stage, summarized)
+
+- **frontend-builder**: `npm ci` + `npm run build` (Angular) → `dist/`
+- **backend-builder**: `npm ci` + `npm run build` (TS) → `dist/`
+- **runtime**: Node 20 Alpine, install prod deps for backend, copy backend **dist** and frontend build → `/ui`, create `/content`, run `apps/backend/dist/main.js`.
+
+### Build & Run
+
+```bash
+docker build -t scribe-ektaron:latest .
+docker run -d --name scribe-ektaron \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e API_KEY=change-me \
+  -e CONTENT_ROOT=/content \
+  -e UI_ROOT=/ui \
+  -e API_PREFIX=/api \
+  -v $(pwd)/content:/content \
+  scribe-ektaron:latest
+```
+
+Now:
+
+- Angular SPA → `http://localhost:3000/`
+- Manifest → `http://localhost:3000/content/_manifest.json`
+- API → `http://localhost:3000/api/...`
+
+### docker-compose
+
+```yaml
+services:
+  scribe-ektaron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: scribe-ektaron:latest
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./content:/content
+    ports:
+      - '3000:3000'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
+      interval: 20s
+      timeout: 3s
+      retries: 5
+```
+
+> **Note**: The backend should expose `/health` (text `ok`) for the healthcheck and `/api/ping` for JSON status.
+
+## Nginx (optional, TLS / reverse proxy)
+
+You **no longer** need per-folder config. Put Nginx in front for HTTPS and proxy **all** to the Node container, keeping `/content` and SPA fallback served by Express:
+
+```nginx
+server {
+  listen 80;
+  server_name publish.example.com;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl http2;
+  server_name publish.example.com;
+
+  ssl_certificate     /etc/letsencrypt/live/publish.example.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/publish.example.com/privkey.pem;
+
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  add_header X-Content-Type-Options nosniff;
+  add_header X-Frame-Options SAMEORIGIN;
+  add_header Referrer-Policy strict-origin-when-cross-origin;
 }
 ```
 
-On invalid payload (400):
+If you insist on serving `/content` directly from Nginx’s filesystem, you can still mount `./content` there — the SPA will keep working as long as **`/content/_manifest.json` and `filePath` URLs** are reachable.
 
-```json
-{
-  "ok": false,
-  "error": "Invalid request body",
-  "details": {
-    /* zod error structure */
+## CI/CD & Versioning (trunk-based)
+
+- **Trunk** on `main`, **Conventional Commits**, **semantic-release v25** computes **SemVer** and maintains **one unified version** across the monorepo:
+
+  - root `package.json`
+  - `apps/frontend/package.json`
+  - `apps/backend/package.json`
+  - (optional) `apps/*/src/version.ts` via `scripts/sync-version.mjs`
+
+- **GitHub Actions** (`.github/workflows/release.yml`) on every push to `main`:
+
+  - Node **≥ 22.14.0** via `actions/setup-node@v4`
+  - `fetch-depth: 0`
+  - `permissions.contents: write`
+  - Commits `chore(release): x.y.z`, creates tag `vX.Y.Z`, updates `CHANGELOG.md`, publishes GitHub Release.
+
+- Release rules:
+
+  - `feat` → **minor**
+  - `fix` / `hotfix` → **patch**
+  - `type!` or **BREAKING CHANGE** → **major**
+  - Non-cutting: `docs`, `test`, `chore`, `build`.
+
+- Dry-run locally:
+
+```bash
+npx semantic-release --dry-run
+```
+
+## Optional: Private Docker Registry
+
+Run a local `registry:2`, front it with Nginx + BasicAuth, and push **`scribe-ektaron:latest`** there.
+
+**Compose (registry host)**
+
+```yaml
+services:
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+    volumes:
+      - /srv/registry/data:/var/lib/registry
+    ports:
+      - '127.0.0.1:5000:5000'
+```
+
+**Nginx (TLS + auth)**
+
+```nginx
+server {
+  listen 80;
+  server_name registry.example.com;
+  return 301 https://$host$request_uri;
+}
+server {
+  listen 443 ssl http2;
+  server_name registry.example.com;
+
+  ssl_certificate     /etc/letsencrypt/live/registry.example.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/registry.example.com/privkey.pem;
+
+  client_max_body_size 0;
+
+  location /v2/ {
+    auth_basic           "Private Docker Registry";
+    auth_basic_user_file /etc/nginx/htpasswd-registry;
+
+    proxy_pass          http://127.0.0.1:5000;
+    proxy_read_timeout  900;
+
+    proxy_set_header    Host $host;
+    proxy_set_header    X-Real-IP $remote_addr;
+    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Forwarded-Proto $scheme;
   }
 }
 ```
 
-On missing/invalid API key:
-
-- `401` if `x-api-key` is missing.
-- `403` if `x-api-key` is wrong.
-
-On internal server error:
-
-- `500` with `{ "ok": false, "error": "Internal server error" }`.
-
-## Building for Production (without Docker)
-
-Build TypeScript:
+**Push**
 
 ```bash
-npm run build
+docker login registry.example.com
+docker build -t registry.example.com/scribe-ektaron:latest .
+docker push registry.example.com/scribe-ektaron:latest
 ```
 
-This uses `tsconfig.build.json` and outputs JS to `dist/`.
-
-Run:
-
-```bash
-NODE_ENV=production \
-PORT=3000 \
-API_KEY=change-me \
-CONTENT_ROOT=/var/www/personal-publish/site \
-node dist/main.js
-```
-
-You must ensure that the `CONTENT_ROOT` directory exists and is writable by the process.
-
-## Docker Deployment
-
-### Dockerfile
-
-The repository includes a multi-stage Dockerfile:
-
-- Stage 1: Node 20 Alpine, install deps, compile TS → JS.
-- Stage 2: Node 20 Alpine, install only production deps, run `dist/main.js`.
-
-Build:
-
-```bash
-docker build -t personal-publish:latest .
-```
-
-Run:
-
-```bash
-docker run -d \
-  --name personal-publish \
-  -p 3000:3000 \
-  -e PORT=3000 \
-  -e API_KEY=change-me \
-  -e CONTENT_ROOT=/var/www/personal-publish/site \
-  -e NODE_ENV=production \
-  -v /srv/personal-publish/site:/var/www/personal-publish/site \
-  personal-publish:latest
-```
-
-- The host directory `/srv/personal-publish/site` will contain all generated HTML.
-- Nginx can serve this directory directly.
-
-### docker-compose example
-
-Create `docker-compose.yml`:
+**Use**
 
 ```yaml
 services:
-  personal-publish:
-    image: personal-publish:latest
-    container_name: personal-publish
-    restart: unless-stopped
-
-    env_file:
-      - .env
-
-    environment:
-      NODE_ENV: production
-
-    volumes:
-      - /srv/personal-publish/site:/var/www/personal-publish/site
-
-    ports:
-      - '127.0.0.1:3000:3000'
+  scribe-ektaron:
+    image: registry.example.com/scribe-ektaron:latest
+    # ...
 ```
 
-Example `.env`:
+## Notes & Trade-offs
 
-```env
-PORT=3000
-API_KEY=change-me
-CONTENT_ROOT=/var/www/personal-publish/site
-NODE_ENV=production
-```
+- Backend auth is a **simple API key**; no users/sessions/ACL.
+- Server-side sanitization is deliberately conservative; expand as needed.
+- Front assumes the HTML produced by the backend is trusted. If not, add a client sanitizer.
+- The “single process” container is **simpler** and avoids supervising multiple daemons; if you need nginx/Caddy in-container, expect more complexity.
+- No delete endpoint yet; can be added as another use case and manifest rebuild.
 
-Then:
+## Healthchecks (summary)
 
-```bash
-docker compose up -d
-```
+- **JSON**: `GET /api/ping` → `{ ok: true, service, version, timestamp }`
+- **Plain**: `GET /health` → `ok` (used by Docker healthcheck)
 
-## Nginx Configuration (Static Site + API)
-
-Assuming:
-
-- `personal-publish` runs on `127.0.0.1:3000`.
-- Static content root is `/srv/personal-publish/site`.
-- Domain name: `publish.example.com`.
-
-Example Nginx configuration:
-
-```nginx
-server {
-    listen 80;
-    server_name publish.example.com;
-
-    # Redirect HTTP -> HTTPS (optional but recommended)
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name publish.example.com;
-
-    ssl_certificate     /etc/letsencrypt/live/publish.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/publish.example.com/privkey.pem;
-
-    # Static site generated by personal-publish
-    root /srv/personal-publish/site;
-    index index.html;
-
-    # API backend
-    location /api/ {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # Static files: everything else is served from the generated site
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    add_header X-Content-Type-Options nosniff;
-    add_header X-Frame-Options SAMEORIGIN;
-    add_header Referrer-Policy strict-origin-when-cross-origin;
-}
-```
-
-## Optional: Private Docker Registry (Advanced)
-
-If you want to host your own Docker registry (e.g. `registry.example.com`) and push images there:
-
-1. Run a `registry:2` container on your server (only on localhost):
-
-   ```yaml
-   # /srv/apps/registry/docker-compose.yml
-   services:
-     registry:
-       image: registry:2
-       container_name: registry
-       restart: unless-stopped
-       environment:
-         REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
-       volumes:
-         - /srv/registry/data:/var/lib/registry
-       ports:
-         - '127.0.0.1:5000:5000'
-   ```
-
-2. Put Nginx in front of it on `registry.example.com`:
-
-   ```nginx
-   server {
-       listen 80;
-       server_name registry.example.com;
-       return 301 https://$host$request_uri;
-   }
-
-   server {
-       listen 443 ssl http2;
-       server_name registry.example.com;
-
-       ssl_certificate     /etc/letsencrypt/live/registry.example.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/registry.example.com/privkey.pem;
-
-       # Allow big Docker layers
-       client_max_body_size 0;
-
-       location /v2/ {
-           auth_basic           "Private Docker Registry";
-           auth_basic_user_file /etc/nginx/htpasswd-registry;
-
-           proxy_pass          http://127.0.0.1:5000;
-           proxy_read_timeout  900;
-
-           proxy_set_header    Host $host;
-           proxy_set_header    X-Real-IP $remote_addr;
-           proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header    X-Forwarded-Proto $scheme;
-       }
-   }
-   ```
-
-3. From your dev machine:
-
-   ```bash
-   docker login registry.example.com
-   docker build -t registry.example.com/personal-publish:latest .
-   docker push registry.example.com/personal-publish:latest
-   ```
-
-4. On your server, use this image in `docker-compose.yml`:
-
-   ```yaml
-   services:
-     personal-publish:
-       image: registry.example.com/personal-publish:latest
-       # ...
-   ```
-
-Then:
-
-```bash
-docker compose pull
-docker compose up -d
-```
-
-## Notes / Trade-offs
-
-- The backend purposely does **not** handle:
-  - user management,
-  - authentication beyond a simple API key,
-  - dynamic rendering or client-side JS frontends.
-
-- It is designed to be a **simple publishing pipeline**:
-  - Obsidian (or another tool) → API → static HTML → Nginx.
-
-- The CSS is embedded in the HTML template for simplicity; if you want advanced theming, you can:
-  - replace the inline `<style>` with a shared CSS file,
-  - add assets and more complex layouts in the filesystem adapter.
-
-If you want to extend the system (page listing API, delete endpoint, manifest search, custom templates, etc.), the Clean Architecture structure should make it straightforward to add new use cases and adapters without mixing HTTP/infra concerns into the domain.
+That’s it. With this setup, you keep **Clean Architecture** on both sides, remove **per-folder Nginx hacks**, and ship a single, predictable **`scribe-ektaron`** image.
