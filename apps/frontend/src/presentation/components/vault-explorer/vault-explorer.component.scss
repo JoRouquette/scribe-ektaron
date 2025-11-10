@@ -1,0 +1,116 @@
+.explorer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 100%;
+
+  .search {
+    margin: 8px 8px 4px;
+    --mdc-filled-text-field-container-color: transparent;
+    --mdc-outlined-text-field-container-shape: 10px;
+
+    input {
+      font-size: 0.95rem;
+    }
+  }
+
+  .sep {
+    margin: 0 8px 6px;
+  }
+
+  .tree {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 4px 4px 12px;
+
+    min-width: 0;
+  }
+
+  .level {
+    --indent: 8px;
+    margin-left: 0;
+    min-width: 0;
+  }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    min-width: 0;
+  }
+
+  .folder {
+    border-radius: 10px;
+    margin: 2px 4px;
+
+    .node-header {
+      min-height: 40px;
+      padding: 0 8px 0 6px;
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--mat-sys-surface-variant) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
+    }
+    .folder-ico {
+      color: var(--its-primary, var(--mat-sys-primary));
+      opacity: 0.95;
+    }
+    .chev {
+      transition: transform 0.18s ease;
+    }
+    .mat-expansion-indicator::after {
+      display: none;
+    }
+    &.mat-expanded .chev {
+      transform: rotate(180deg);
+    }
+
+    .children {
+      padding: 2px 0 6px 8px;
+    }
+  }
+
+  .file {
+    padding: 6px 8px;
+    margin: 1px 4px 1px calc(8px + 2px);
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--mat-sys-surface-variant) 6%, transparent);
+    border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 45%, transparent);
+
+    &:hover {
+      background: color-mix(in oklab, var(--mat-sys-surface-variant) 12%, transparent);
+      border-color: color-mix(in oklab, var(--mat-sys-outline-variant) 65%, transparent);
+    }
+
+    .file-ico {
+      color: var(--its-secondary, var(--mat-sys-secondary));
+      opacity: 0.95;
+    }
+  }
+
+  .label {
+    font-size: 0.95rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .muted {
+    opacity: 0.7;
+    padding: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .search {
+      margin: 8px 6px 2px;
+    }
+    .sep {
+      margin: 0 6px 4px;
+    }
+    .file {
+      margin-left: 10px;
+    }
+  }
+}

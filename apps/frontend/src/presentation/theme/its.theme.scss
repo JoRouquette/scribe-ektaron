@@ -50,32 +50,9 @@ $its-dark: mat.define-theme(
   )
 );
 
-@mixin material-from-its($theme) {
-  @include mat.all-component-themes($theme);
-
-  .mat-app-background,
-  .mat-mdc-button,
-  .mat-mdc-menu-panel,
-  .mat-mdc-card,
-  .mat-toolbar {
-    --mdc-theme-primary: var(--its-primary);
-    --mdc-theme-on-primary: var(--its-on-primary);
-    --mdc-theme-secondary: var(--its-secondary);
-    --mdc-theme-on-secondary: var(--its-on-secondary);
-    --mdc-theme-tertiary: var(--its-tertiary);
-    --mdc-theme-on-tertiary: var(--its-on-tertiary);
-
-    --mdc-theme-surface: var(--its-surface);
-    --mdc-theme-on-surface: var(--its-on-surface);
-    --mdc-theme-surface-variant: var(--its-surface-variant);
-    --mdc-theme-outline: var(--its-outline);
-    --mat-sys-surface-container: var(--its-background);
-  }
-}
-
 :root.theme-light {
-  @include material-from-its($its-light);
+  @include mat.theme($its-light);
 }
 :root.theme-dark {
-  @include material-from-its($its-dark);
+  @include mat.theme($its-dark);
 }

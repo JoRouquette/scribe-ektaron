@@ -1,88 +1,154 @@
+$col-left: 13em;
+$row-top: 5em;
+
 :host {
+  display: block;
+  min-height: 100dvh;
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-background);
+}
+
+.grid {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: $col-left 1fr;
+  grid-template-rows: $row-top 1fr;
   grid-template-areas:
-    'logo header'
-    'nav  main'
-    'nav  footer';
-  height: 100dvh;
-  background: var(--its-background);
-  color: var(--its-on-surface);
+    'Logo TopBar'
+    'vault-explorer main';
+  gap: 0;
+
+  /* Autorise les lignes/colonnes à rétrécir et laisser scroller les enfants */
+  min-height: calc(100dvh - 44px);
+  background: var(--mat-sys-surface);
+  border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
-.header {
-  grid-area: header;
-  background: var(--its-surface);
-  border-bottom: 1px solid var(--its-outline);
-}
+/* — ZONES — */
 
-.nav {
-  grid-area: nav;
-  background: var(--its-surface);
-  border-right: 1px solid var(--its-outline);
-}
-
-.logo {
-  grid-area: logo;
+.Logo {
+  grid-area: Logo;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--its-surface);
-  border-right: 1px solid var(--its-outline);
+  background: var(--mat-sys-surface);
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  /* Évite tout overflow de contenu dans la cellule */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden; /* le logo est contenu */
+}
+
+.TopBar {
+  grid-area: TopBar;
+  display: flex;
+  align-items: stretch;
+  background: var(--mat-sys-surface);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  /* Pour que mat-toolbar et les breadcrumbs ne fassent pas déborder */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+
+  /* S’assure que la toolbar s’étire sur toute la zone */
+  app-topbar,
+  .mat-toolbar {
+    inline-size: 100%;
+    min-width: 0;
+  }
+}
+
+.vault-explorer {
+  grid-area: vault-explorer;
+  display: flex;
+  flex-direction: column;
+  background: var(--mat-sys-surface);
+  border-right: 1px solid var(--mat-sys-outline-variant);
+
+  /* LA cellule ne scrolle pas : c'est l'intérieur du composant qui scrolle */
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .main {
   grid-area: main;
-  background: var(--its-surface);
-}
-
-.footer {
-  grid-area: footer;
-  background: var(--its-surface-variant);
-  color: var(--its-on-surface);
-}
-
-.breadcrumbs {
   display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  font-weight: 500;
+  flex-direction: column;
+  background: var(--mat-sys-surface);
+  padding: 16px clamp(12px, 3vw, 24px);
+
+  /* Autorise le router-outlet et ses pages à utiliser le scroll */
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
 }
 
-.breadcrumbs a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.logo {
-  position: absolute;
-  left: 260px;
-  top: 56px;
-  transform: translate(-50%, -50%);
-  width: 44px;
+/* Footer */
+.footer {
   height: 44px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in oklab, var(--mat-sys-primary) 20%, transparent);
-  border: 1px solid color-mix(in oklab, var(--mat-sys-primary) 50%, transparent);
-  font-weight: 700;
+  gap: 0.5rem;
+
+  background: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  .repo-link {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+    }
+  }
+}
+
+/* — RESPONSIVE — */
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: 10.5em 1fr;
+  }
 }
 
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;
-    grid-template-rows: 56px auto 1fr 28px;
-    grid-template-areas: 'header' 'sidebar' 'content' 'footer';
+    grid-template-rows: auto auto minmax(30dvh, 40dvh) 1fr;
+    grid-template-areas:
+      'Logo'
+      'TopBar'
+      'vault-explorer'
+      'main';
   }
 
-  .logo {
-    left: 56px;
+  .vault-explorer {
+    border-right: none;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  .main {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .grid {
+    grid-template-rows: auto auto minmax(26dvh, 36dvh) 1fr;
   }
 }

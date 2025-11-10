@@ -1,23 +1,31 @@
-import { Injectable } from '@angular/core';
+// src/presentation/services/theme.service.ts
+import { Injectable, signal } from '@angular/core';
+
+const STORAGE_KEY = 'theme';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private current: 'light' | 'dark' = 'dark';
+  private _isDark = signal(false);
+  isDark = () => this._isDark();
 
   init() {
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    this.current = prefersDark ? 'dark' : 'light';
-    this.apply();
+    // Choix initial : localStorage > prefers-color-scheme
+    const saved = localStorage.getItem(STORAGE_KEY) as 'light' | 'dark' | null;
+    const preferDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+    this.setTheme(saved ?? (preferDark ? 'dark' : 'light'));
   }
 
   toggle() {
-    this.current = this.current === 'dark' ? 'light' : 'dark';
-    this.apply();
+    this.setTheme(this._isDark() ? 'light' : 'dark');
   }
 
-  private apply() {
-    const root = document.documentElement;
+  private setTheme(mode: 'light' | 'dark') {
+    this._isDark.set(mode === 'dark');
+    const root = document.documentElement; // <html>
     root.classList.remove('theme-light', 'theme-dark');
-    root.classList.add(this.current === 'dark' ? 'theme-dark' : 'theme-light');
+    root.classList.add(mode === 'dark' ? 'theme-dark' : 'theme-light');
+    // Hint navigateur pour formulaires/scrollbars
+    root.style.colorScheme = mode;
+    localStorage.setItem(STORAGE_KEY, mode);
   }
 }

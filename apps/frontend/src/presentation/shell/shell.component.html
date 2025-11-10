@@ -1,25 +1,32 @@
-<header class="header mat-elevation-z2">
-  <app-topbar
-    [siteName]="siteName()"
-    [crumbs]="crumbs()"
-    (toggleTheme)="theme.toggle()">
-  </app-topbar>
-</header>
+<div class="grid">
+  <div class="Logo">
+    <app-logo></app-logo>
+  </div>
 
-<div class="logo">
-  <app-logo></app-logo>
+  <div class="TopBar mat-elevation-z2">
+    <app-topbar
+      [siteName]="siteName()"
+      [crumbs]="crumbs()"
+      [isDark]="theme.isDark()"
+      (toggleTheme)="theme.toggle()"
+      (crumbClicked)="onCrumbClicked($event)"
+    >
+    </app-topbar>
+  </div>
+
+  <div class="vault-explorer">
+    <app-vault-explorer></app-vault-explorer>
+  </div>
+
+  <div class="main">
+    <router-outlet></router-outlet>
+  </div>
 </div>
 
-<nav class="nav">
-  <app-vault-explorer></app-vault-explorer>
-</nav>
-
-<main class="main">
-  <!-- 👉 c’est ICI que les pages s’affichent -->
-  <router-outlet />
-</main>
-
 <footer class="footer">
-  © {{author()}} —
-  <a [href]="repo()" target="_blank" rel="noopener">Code source</a>
+  © {{ author() }} —
+  <a class="repo-link" [href]="repo()" target="_blank" rel="noopener">
+    <mat-icon aria-hidden="true">open_in_new</mat-icon>
+    Repository git : {{ repo() }}
+  </a>
 </footer>

@@ -1,9 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   standalone: true,
   selector: 'app-logo',
+  imports: [RouterLink],
   templateUrl: './logo.component.html',
   styleUrls: ['./logo.component.scss'],
 })
-export class LogoComponent {}
+export class LogoComponent {
+  private readonly theme = inject(ThemeService);
+
+  readonly src = computed(() =>
+    this.theme.isDark()
+      ? 'assets/logo/heptacle-origine-light-256.png'
+      : 'assets/logo/heptacle-origine-dark-256.png'
+  );
+}

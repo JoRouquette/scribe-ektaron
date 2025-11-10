@@ -1,0 +1,32 @@
+<mat-toolbar class="topbar mat-elevation-z2" role="banner">
+  <!-- Colonne gauche : Breadcrumbs -->
+  <nav class="breadcrumbs" aria-label="Fil d’Ariane">
+    @for (c of crumbs; track c.url; let last = $last) {
+    <a class="crumb" [routerLink]="c.url" (click)="crumbClicked.emit(c)">
+      <span [class.last]="last">{{ c.label }}</span>
+    </a>
+    @if (!last) {
+    <mat-icon class="sep" aria-hidden="true">chevron_right</mat-icon>
+    } }
+  </nav>
+
+  <a class="site-name" [routerLink]="'/'" aria-label="Accueil">
+    {{ siteName || 'Scribe d’Ektaron' }}
+  </a>
+
+  <div
+    class="toolbar-actions"
+    matTooltip="{{ isDark ? 'Activer le thème clair' : 'Activer le thème sombre' }}"
+    matTooltipPosition="left"
+  >
+    <button
+      mat-icon-button
+      type="button"
+      (click)="toggleTheme.emit()"
+      [attr.aria-label]="isDark ? 'Activer le thème clair' : 'Activer le thème sombre'"
+    >
+      @if (!isDark) { <mat-icon>dark_mode</mat-icon> } @if (isDark) {
+      <mat-icon>light_mode</mat-icon> }
+    </button>
+  </div>
+</mat-toolbar>

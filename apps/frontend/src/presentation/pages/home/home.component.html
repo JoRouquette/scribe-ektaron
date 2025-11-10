@@ -1,36 +1,30 @@
 <section class="home" aria-live="polite">
-  <h1>Index</h1>
-  <p>Bienvenue sur votre site de lore.</p>
+  <header class="head">
+    <div class="title-block">
+      <h1 class="title">Index</h1>
+      <p class="intro">Bienvenue sur votre site de lore.</p>
+    </div>
 
-  <form class="search" (submit)="$event.preventDefault()">
-    <label class="sr-only" for="q">Rechercher</label>
-    <input
-      id="q"
-      type="search"
-      placeholder="Rechercher…"
-      [value]="facade.query()"
-      (input)="onQueryInput($event)"
-      autocomplete="off"
-      spellcheck="false"
-    />
-  </form>
+    <form class="search" (submit)="$event.preventDefault()">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-icon matPrefix class="search-ico">search</mat-icon>
+        <input
+          matInput
+          id="q"
+          type="search"
+          placeholder="Rechercher…"
+          [value]="facade.query()"
+          (input)="onQueryInput($event)"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Rechercher"
+        />
+        @if (facade.loading()) {
+        <mat-icon matSuffix class="spin">hourglass_empty</mat-icon>
+        }
+      </mat-form-field>
+    </form>
+  </header>
 
-  @if (facade.error()) {
-  <p class="error">{{ facade.error() }}</p>
-  } @else { @if (facade.loading()) {
-  <p>Chargement…</p>
-  } @else { @if (facade.results().length === 0) {
-  <p>Aucun résultat.</p>
-  } @else {
-  <ul class="list" role="list">
-    @for (p of facade.results(); track p.slug.value) {
-    <li>
-      <a [routerLink]="['/p', p.slug.value]">{{ p.title }}</a>
-      @if (p.tags.length) {
-      <small>— {{ p.tags.join(', ') }}</small>
-      }
-    </li>
-    }
-  </ul>
-  } } }
+  <mat-divider class="sep"></mat-divider>
 </section>

@@ -1,0 +1,113 @@
+:host, .home { min-inline-size: 0; }
+:host { display: block; inline-size: 100%; block-size: 100%; }
+
+.home {
+  /* conteneur fluide, sans déborder la zone main */
+  --container-pad-inline: clamp(12px, 3vw, 24px);
+  padding-inline: var(--container-pad-inline);
+  color: var(--its-on-surface, var(--mat-sys-on-surface));
+}
+
+/* ======= HEAD propre et robuste ======= */
+.head {
+  display: flex;
+  align-items: flex-end;                /* baseline visuelle titre / champ */
+  justify-content: space-between;
+  gap: clamp(8px, 2vw, 24px);
+  margin-block: clamp(8px, 1.5vw, 16px) clamp(8px, 1.5vw, 12px);
+  min-inline-size: 0;                   /* évite l’overflow dans la grid */
+}
+
+.title-block {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.title {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 1rem + 1.6vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: .2px;
+  color: var(--its-headers, var(--mat-sys-primary));
+}
+
+.intro {
+  margin: .25rem 0 0 0;
+  font-size: clamp(.9rem, .85rem + .2vw, 1rem);
+  opacity: .80;
+}
+
+.search {
+  flex: 0 1 min(520px, 42ch);           /* largeur maîtrisée du champ */
+  min-inline-size: 240px;
+}
+
+.search-field { inline-size: 100%; }
+.search-ico { opacity: .85; }
+
+/* petit polish M3 sans styles “profonds” agressifs */
+.search-field .mdc-notched-outline__leading,
+.search-field .mdc-notched-outline__notch,
+.search-field .mdc-notched-outline__trailing {
+  border-color: color-mix(in oklab, var(--mat-sys-outline-variant) 80%, transparent);
+}
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* séparateur entre head et contenu */
+.sep { margin: 10px 0 14px; }
+
+/* ======= Sections niveau 0 ======= */
+.sections { margin-block: 6px 10px; }
+
+.h2 {
+  margin: 0 0 .5rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--its-on-surface, var(--mat-sys-on-surface));
+  opacity: .9;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: var(--its-surface, var(--mat-sys-surface));
+  color: var(--its-on-surface, var(--mat-sys-on-surface));
+  border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 55%, transparent);
+  border-radius: 16px;
+}
+
+.card-title {
+  color: var(--its-headers, var(--mat-sys-primary));
+  line-height: 1.2;
+}
+
+.card-sub { opacity: .8; }
+.card-content { padding-inline: 16px; }
+.desc { margin: 0; opacity: .95; }
+
+/* ======= Résultats ======= */
+.results { margin-block: 10px 20px; }
+.tags { opacity: .75; }
+
+/* États */
+.muted { opacity: .7; }
+.error { color: #b00020; }
+
+/* ======= Responsive ======= */
+@media (max-width: 900px) {
+  .head {
+    flex-direction: column;     /* pile titre + recherche */
+    align-items: stretch;
+  }
+  .search {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+  }
+}

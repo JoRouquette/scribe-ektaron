@@ -1,22 +1,75 @@
-<nav class="vault">
-  @if (tree()) {
-  <ul class="tree">
-    <ng-container *ngTemplateOutlet="node; context: { $implicit: tree() }"></ng-container>
-  </ul>
+<nav class="explorer">
+  <!-- Barre de recherche -->
+  <mat-form-field class="search" appearance="outline">
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    <input
+      matInput
+      type="search"
+      [value]="q()"
+      (input)="onInputQuery($any($event.target).value)"
+      placeholder="Rechercher…"
+      aria-label="Rechercher dans le contenu"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    @if (q()) {
+    <button mat-icon-button matSuffix type="button" aria-label="Effacer" (click)="onInputQuery('')">
+      <mat-icon>close</mat-icon>
+    </button>
+    }
+  </mat-form-field>
+
+  <mat-divider class="sep"></mat-divider>
+
+  <!-- Arbre -->
+  @if (filteredTree()) {
+  <!-- Racine : on affiche ses enfants. multi=true autorise plusieurs dossiers ouverts -->
+  <div class="tree">
+    <mat-accordion [multi]="true" class="level">
+      @for (n of filteredTree()!.children; track n.path) {
+      <ng-container
+        [ngTemplateOutlet]="nodeTpl"
+        [ngTemplateOutletContext]="{ $implicit: n }"
+      ></ng-container>
+      }
+    </mat-accordion>
+  </div>
   } @else {
   <p class="muted">Aucun contenu</p>
   }
 
-  <ng-template #node let-n>
-    <li>
-      <a [routerLink]="['/p', n.path]">{{ n.name || 'root' }}</a>
-      @if (n.children?.length) {
-      <ul>
-        @for (c of n.children; track c.path) {
-        <ng-container *ngTemplateOutlet="node; context: { $implicit: c }"></ng-container>
-        }
-      </ul>
-      }
-    </li>
+  <!-- Template récursif -->
+  <ng-template #nodeTpl let-n>
+    @if (isFolder(n)) {
+    <!-- Dossier -->
+    <mat-expansion-panel class="node folder" hideToggle>
+      <mat-expansion-panel-header class="node-header" role="button" aria-label="Ouvrir le dossier">
+        <mat-panel-title>
+          <mat-icon class="ico folder-ico">folder</mat-icon>
+          <span class="label">{{ n.name || 'root' }}</span>
+        </mat-panel-title>
+        <mat-panel-description>
+          <mat-icon class="chev" aria-hidden="true">unfold_more</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="children">
+        <mat-accordion [multi]="true" class="level">
+          @for (c of n.children; track c.path) {
+          <ng-container
+            [ngTemplateOutlet]="nodeTpl"
+            [ngTemplateOutletContext]="{ $implicit: c }"
+          ></ng-container>
+          }
+        </mat-accordion>
+      </div>
+    </mat-expansion-panel>
+    } @else {
+    <!-- Fichier -->
+    <a class="node file" [routerLink]="['/p', n.path]" aria-label="Ouvrir le fichier">
+      <mat-icon class="ico file-ico">description</mat-icon>
+      <span class="label">{{ n.name }}</span>
+    </a>
+    }
   </ng-template>
 </nav>

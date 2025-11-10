@@ -1,4 +1,4 @@
-import { Component, inject, effect, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
@@ -10,14 +10,18 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ViewerComponent {
   private route = inject(ActivatedRoute);
+
   title = signal<string>('');
   html = signal<SafeHtml>('Chargement…' as any);
-
-  slug: string = '';
+  slug = '';
 
   constructor() {
     this.route.paramMap.subscribe((pm) => {
       this.slug = pm.get('slug') ?? '';
+    });
+
+    this.route.data.subscribe((d) => {
+      if (typeof d['title'] === 'string') this.title.set(d['title']);
     });
   }
 }

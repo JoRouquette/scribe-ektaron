@@ -1,0 +1,149 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  /* Crucial pour ne pas forcer un overflow horizontal dans la grid */
+  min-width: 0;
+  min-height: 0;
+  /* pas d'overflow ici : le parent (.main) scrolle */
+}
+
+.viewer {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  color: var(--its-on-surface, var(--mat-sys-on-surface));
+  background: transparent;
+
+  .title {
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+    color: var(--its-headers, var(--mat-sys-primary));
+    word-break: break-word;
+  }
+
+  .content {
+    /* Anti-débordement horizontal sur contenus arbitraires */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+
+    /* Typo de base */
+    line-height: 1.6;
+    color: var(--its-on-surface, var(--mat-sys-on-surface));
+  }
+
+  /* Images, vidéos, SVG : jamais plus large que la zone, conservent le ratio */
+  .content img,
+  .content video,
+  .content svg,
+  .content canvas {
+    display: block;
+    max-inline-size: 100%;
+    height: auto;
+  }
+
+  /* Iframes embarquées (ex: YouTube) : responsive */
+  .content iframe {
+    display: block;
+    width: 100%;
+    max-inline-size: 100%;
+    border: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Code inline & blocs */
+  .content code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    background: color-mix(in oklab, var(--mat-sys-surface-variant) 25%, transparent);
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+  }
+
+  .content pre {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: color-mix(in oklab, var(--mat-sys-surface-variant) 30%, transparent);
+    border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
+    border-radius: 10px;
+    overflow: auto; /* scroll horizontal local si nécessaire */
+    max-inline-size: 100%;
+  }
+  .content pre > code {
+    background: transparent;
+    padding: 0;
+  }
+
+  .content blockquote {
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    border-inline-start: 4px solid var(--its-secondary, var(--mat-sys-secondary));
+    background: color-mix(in oklab, var(--mat-sys-surface-variant) 15%, transparent);
+    border-radius: 8px;
+  }
+
+  .content ul,
+  .content ol {
+    padding-inline-start: 1.25rem;
+    margin: 0.5rem 0 0.75rem;
+  }
+
+  .content h2,
+  .content h3,
+  .content h4,
+  .content h5,
+  .content h6 {
+    margin: 1.25rem 0 0.5rem;
+    color: var(--its-headers, var(--mat-sys-primary));
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  /* Liens */
+  .content a {
+    color: var(--its-secondary, var(--mat-sys-secondary));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Tables : pas d’overflow global, scroll local si trop large */
+  .content table {
+    border-collapse: collapse;
+    width: 100%;
+    max-inline-size: 100%;
+    /* Pour éviter le débordement dur, on laisse wrap, et on garde un scroll au besoin via l’enveloppe */
+    display: block;
+    overflow-x: auto;
+    border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
+    border-radius: 10px;
+  }
+  .content thead {
+    background: color-mix(in oklab, var(--mat-sys-surface-variant) 25%, transparent);
+  }
+  .content th,
+  .content td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 45%, transparent);
+    vertical-align: top;
+    white-space: normal; /* laisse le wrap */
+  }
+  .content tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* Médias petits : rapproche un peu les espacements */
+  @media (max-width: 600px) {
+    .content {
+      line-height: 1.55;
+    }
+    .content pre {
+      padding: 0.6rem 0.75rem;
+    }
+    .content th,
+    .content td {
+      padding: 0.45rem 0.6rem;
+    }
+  }
+}
