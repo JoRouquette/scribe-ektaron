@@ -1,3 +1,9 @@
+## <small>1.1.2 (2025-11-10)</small>
+
+* fix: publish-frontend issues ([f761f1c](https://github.com/JoRouquette/scribe-ektaron/commit/f761f1c))
+* Merge branch 'main' of https://github.com/JoRouquette/scribe-ektaron ([ef1350c](https://github.com/JoRouquette/scribe-ektaron/commit/ef1350c))
+* chore: add favicon ([dde94b4](https://github.com/JoRouquette/scribe-ektaron/commit/dde94b4))
+
 ## <small>1.1.1 (2025-11-10)</small>
 
 * fix: complete theming and grid ([ad07ee5](https://github.com/JoRouquette/scribe-ektaron/commit/ad07ee5))
