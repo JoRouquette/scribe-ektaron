@@ -4,3 +4,9 @@
 /.vscode
 .env
 /tmp
+
+# Ignore node_modules, dist, and .env in all apps
+/apps/*/node_modules
+/apps/*/dist
+/apps/*/.env
+/apps/*/tmp

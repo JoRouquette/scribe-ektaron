@@ -16,6 +16,8 @@ async function bootstrap() {
   const app = createApp({
     apiKey: EnvConfig.apiKey() || '',
     publishNotesUseCase,
+    uiRoot: EnvConfig.uiRoot(),
+    contentRoot: EnvConfig.contentRoot(),
   });
 
   app.listen(EnvConfig.port(), () => {

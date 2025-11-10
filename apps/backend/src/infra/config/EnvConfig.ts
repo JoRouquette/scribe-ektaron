@@ -6,6 +6,9 @@ export class EnvConfig {
   static apiKey(): string {
     return this.norm(process.env.API_KEY);
   }
+  static uiRoot(): string {
+    return this.norm(process.env.UI_ROOT) || './tmp/ui';
+  }
   static contentRoot(): string {
     return this.norm(process.env.CONTENT_ROOT) || './tmp/site';
   }
