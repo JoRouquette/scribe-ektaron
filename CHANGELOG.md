@@ -1,3 +1,10 @@
+## 1.1.0 (2025-11-10)
+
+* feat: add theming and gridstyle ([53219e5](https://github.com/JoRouquette/scribe-ektaron/commit/53219e5))
+* fix: docker and api routes ([9001a9f](https://github.com/JoRouquette/scribe-ektaron/commit/9001a9f))
+* build: updating docker configuration ([e4b1617](https://github.com/JoRouquette/scribe-ektaron/commit/e4b1617))
+* docs: update README ([1c492b5](https://github.com/JoRouquette/scribe-ektaron/commit/1c492b5))
+
 ## 1.0.0 (2025-11-10)
 
 * ci: add semver and conventionnal commits ([fb0ba94](https://github.com/JoRouquette/scribe-ektaron/commit/fb0ba94))
