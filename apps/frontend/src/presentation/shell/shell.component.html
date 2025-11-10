@@ -1,0 +1,40 @@
+<div class="grid">
+  <!-- Header -->
+  <mat-toolbar color="primary" class="header">
+    <nav class="breadcrumbs">
+      <a routerLink="/">
+        {{ currentTitle || siteName() || 'Scribe d’Ektaron' }}
+      </a>
+      @if (crumbs().length) {
+      <span>›</span>
+      @for (c of crumbs(); track c.url) {
+      <a [routerLink]="c.url">{{ c.label }}</a>
+      @if (!$last) { <span>›</span> } } }
+    </nav>
+
+    <div class="spacer"></div>
+    <button mat-icon-button aria-label="Basculer thème" (click)="theme.toggle()">
+      <mat-icon>dark_mode</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <!-- Logo à l’intersection (overlay) -->
+  <div class="logo">SE</div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <app-vault-explorer />
+  </aside>
+
+  <!-- Contenu -->
+  <main class="content">
+    <router-outlet />
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    © {{ author() || 'Anonyme' }} — @if (repo()) {
+    <a [href]="repo()" target="_blank" rel="noopener">Code source</a>
+    }
+  </footer>
+</div>

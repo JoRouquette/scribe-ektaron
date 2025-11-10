@@ -33,6 +33,14 @@ export function createApp(options: CreateAppOptions) {
   const uploadController = createUploadController(options.publishNotesUseCase);
   app.post(`${apiBase}/upload`, apiKeyAuth, uploadController);
 
+  app.get(`${apiBase}/public-config`, (_req, res) => {
+    res.json({
+      siteName: 'Scribe d’Ektaron',
+      author: process.env.AUTHOR ?? 'Anonyme',
+      repoUrl: process.env.REPO_URL ?? '',
+    });
+  });
+
   app.use(apiBase, (_req, res) => {
     res.status(404).json({ ok: false, error: 'Not found' });
   });

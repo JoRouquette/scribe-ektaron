@@ -10,7 +10,7 @@ export class EnvConfig {
     return this.norm(process.env.UI_ROOT) || './tmp/ui';
   }
   static contentRoot(): string {
-    return this.norm(process.env.CONTENT_ROOT) || './tmp/site';
+    return this.norm(process.env.CONTENT_ROOT) || './tmp/site-content';
   }
   static port(): number {
     const p = Number(this.norm(process.env.PORT));

@@ -1,0 +1,22 @@
+<nav class="vault">
+  @if (tree()) {
+  <ul class="tree">
+    <ng-container *ngTemplateOutlet="node; context: { $implicit: tree() }"></ng-container>
+  </ul>
+  } @else {
+  <p class="muted">Aucun contenu</p>
+  }
+
+  <ng-template #node let-n>
+    <li>
+      <a [routerLink]="['/p', n.path]">{{ n.name || 'root' }}</a>
+      @if (n.children?.length) {
+      <ul>
+        @for (c of n.children; track c.path) {
+        <ng-container *ngTemplateOutlet="node; context: { $implicit: c }"></ng-container>
+        }
+      </ul>
+      }
+    </li>
+  </ng-template>
+</nav>

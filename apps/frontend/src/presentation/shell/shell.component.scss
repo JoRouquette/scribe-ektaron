@@ -1,0 +1,88 @@
+:host {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'logo header'
+    'nav  main'
+    'nav  footer';
+  height: 100dvh;
+  background: var(--its-background);
+  color: var(--its-on-surface);
+}
+
+.header {
+  grid-area: header;
+  background: var(--its-surface);
+  border-bottom: 1px solid var(--its-outline);
+}
+
+.nav {
+  grid-area: nav;
+  background: var(--its-surface);
+  border-right: 1px solid var(--its-outline);
+}
+
+.logo {
+  grid-area: logo;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--its-surface);
+  border-right: 1px solid var(--its-outline);
+}
+
+.main {
+  grid-area: main;
+  background: var(--its-surface);
+}
+
+.footer {
+  grid-area: footer;
+  background: var(--its-surface-variant);
+  color: var(--its-on-surface);
+}
+
+.breadcrumbs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: 500;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.logo {
+  position: absolute;
+  left: 260px;
+  top: 56px;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklab, var(--mat-sys-primary) 20%, transparent);
+  border: 1px solid color-mix(in oklab, var(--mat-sys-primary) 50%, transparent);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 56px auto 1fr 28px;
+    grid-template-areas: 'header' 'sidebar' 'content' 'footer';
+  }
+
+  .logo {
+    left: 56px;
+  }
+}

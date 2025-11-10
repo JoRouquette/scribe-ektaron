@@ -1,2 +1,14 @@
+@use '@angular/material' as mat;
+@use './presentation/theme/its.theme' as its;
 
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
 
+:root {
+  color-scheme: light dark;
+} // laisse le navigateur aider

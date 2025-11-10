@@ -19,8 +19,8 @@ export class ViewerComponent {
   html = signal<SafeHtml>('Chargement…' as any);
 
   constructor() {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.facade.getHtmlBySlugOrRoute(slug).then((res) => {
+    const path = this.route.snapshot.paramMap.get('path') ?? '';
+    this.facade.getHtmlBySlugOrRoute(path).then((res) => {
       if (!res) {
         this.title.set('Introuvable');
         this.html.set('Contenu non disponible' as any);
