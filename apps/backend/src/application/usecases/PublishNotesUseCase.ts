@@ -69,7 +69,7 @@ export class PublishNotesUseCase {
         slug: n.slug,
         vaultPath: n.vaultPath,
         relativePath: n.relativePath,
-        title: n.frontmatter.title,
+        title: this.extractTitle(n.vaultPath),
         description: n.frontmatter.description,
         tags: n.frontmatter.tags,
         publishedAt: n.publishedAt,
@@ -135,5 +135,12 @@ ${bodyHtml}
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  private extractTitle(vaultPath: string): any {
+    const parts = vaultPath.split('/');
+    const filename = parts[parts.length - 1];
+    const title = filename.replace(/\.mdx?$/i, '').replace(/-/g, ' ');
+    return title.charAt(0).toUpperCase() + title.slice(1);
   }
 }

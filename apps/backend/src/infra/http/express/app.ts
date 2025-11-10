@@ -2,8 +2,11 @@ import express from 'express';
 import type { PublishNotesUseCase } from '../../../application/usecases/PublishNotesUseCase';
 import { createUploadController } from './controllers/uploadController';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuth';
+import path from 'path';
 
 export interface CreateAppOptions {
+  uiRoot: string;
+  contentRoot: string;
   apiKey: string;
   publishNotesUseCase: PublishNotesUseCase;
 }
@@ -42,6 +45,14 @@ export function createApp(options: CreateAppOptions) {
   app.use(`${apiBase}`, (_req, res) => {
     res.status(404).json({ ok: false, error: 'Not found' });
   });
+
+  app.use('/content', express.static(options.contentRoot));
+
+  app.get(`${apiBase}/health`, (_req, res) => {
+    res.status(200).send('OK');
+  });
+
+  app.get('*', (_req, res) => res.sendFile(path.join(options.uiRoot, 'index.html')));
 
   return app;
 }

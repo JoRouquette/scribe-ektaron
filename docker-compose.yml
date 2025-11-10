@@ -1,19 +1,23 @@
 services:
-  personal-publish:
-    build: .
-    container_name: personal-publish
-    restart: unless-stopped
-
-    # Fichier .env spécifique au conteneur (non commité)
-    env_file:
-      - .env.docker
-
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: scribe-ektaron:web
+    ports:
+      - '3000:3000'
     environment:
       NODE_ENV: production
-
-    # Volume pour que Nginx voie les fichiers générés
+      PORT: 3000
+      CONTENT_ROOT: /content
+      UI_ROOT: /ui
+      API_PREFIX: /api
+      API_KEY: ${API_KEY:?set in .env}
     volumes:
-      - /srv/personal-publish/site:/var/www/personal-publish/site
-
-    ports:
-      - '127.0.0.1:3000:3000'
+      - ./content:/content
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
+      interval: 20s
+      timeout: 3s
+      retries: 5
