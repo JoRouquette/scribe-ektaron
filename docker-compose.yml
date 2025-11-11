@@ -20,8 +20,6 @@ services:
       - type: volume
         source: content
         target: /content
-        volume:
-          nocopy: true
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/health || exit 1']
       interval: 20s
