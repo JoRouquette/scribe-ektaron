@@ -32,19 +32,16 @@ export class VaultExplorerComponent {
   private readonly facade = inject(CatalogFacade);
   private readonly build = new BuildTreeUseCase();
 
-  /** Arbre complet (root) */
   tree = signal<TreeNode | null>(null);
 
-  /** Recherche */
   q = signal<string>('');
 
-  /** Arbre filtré en fonction de q() */
   filteredTree = computed(() => this.filterTree(this.tree(), this.q().trim().toLowerCase()));
 
   constructor() {
-    // Build initial tree from manifest
     this.facade.ensureManifest().then(() => {
       const m = this.facade.manifest();
+      console.log('Building vault tree from manifest with', m?.pages?.length ?? 0, 'pages');
       this.tree.set(m ? this.build.exec(m) : null);
     });
   }
@@ -55,6 +52,11 @@ export class VaultExplorerComponent {
 
   isFolder(n: TreeNode): boolean {
     return !!(n.children && n.children.length);
+  }
+
+  capitalize(s: string): string {
+    if (!s) return s;
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
   /** Filtrage récursif : garde le dossier si lui-même ou un descendant match. */

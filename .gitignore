@@ -12,4 +12,4 @@
 /apps/*/tmp
 
 # Ignore build artifacts in the ui app
-/content/**/*
+**/content/**/*

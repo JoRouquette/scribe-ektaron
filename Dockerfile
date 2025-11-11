@@ -22,50 +22,48 @@ ENV NODE_ENV=production \
     PORT=3000 \
     CONTENT_ROOT=/content \
     UI_ROOT=/ui \
-    API_PREFIX=/api
+    API_PREFIX=/api \
+    AUTHOR_NAME="Jonathan Rouquette" \
+    REPO_URL=https://github.com/jonathanrouquette/scribe-ektaron
 
-# 0) Patch sécurité base (réduit les vulnérabilités high/critical)
 RUN apk --no-cache upgrade
 
-# 1) Backend runtime deps (en root pour éviter EACCES), puis purge cache
 WORKDIR /app/apps/backend
 COPY --from=backend-builder /app/backend/package.json ./package.json
 COPY --from=backend-builder /app/backend/package-lock.json ./package-lock.json
 RUN npm ci --omit=dev --omit=optional --no-audit --no-fund \
     && npm cache clean --force
 
-# 2) Code backend compilé
 COPY --from=backend-builder /app/backend/dist ./dist
 
-# 3) Frontend compilé → /ui (détecte le bon sous-dossier de dist)
 WORKDIR /app
-# On copie TOUTE la dist pour décider ensuite du bon chemin
+
 COPY --from=frontend-builder /app/frontend/dist /app/ui-src
 RUN set -eux; \
-    mkdir -p /ui; \
+    mkdir -p ${UI_ROOT}; \
     if [ -d "/app/ui-src/publish-frontend/browser" ]; then \
-    cp -r /app/ui-src/publish-frontend/browser/* /ui/; \
+    cp -r /app/ui-src/publish-frontend/browser/* ${UI_ROOT}; \
     elif [ -d "/app/ui-src/frontend/browser" ]; then \
-    cp -r /app/ui-src/frontend/browser/* /ui/; \
+    cp -r /app/ui-src/frontend/browser/* ${UI_ROOT}; \
     elif [ -f "/app/ui-src/index.html" ]; then \
-    cp -r /app/ui-src/* /ui/; \
+    cp -r /app/ui-src/* ${UI_ROOT}; \
     else \
     echo "ERROR: Angular build not found (expected dist/<project>/browser). Contents of /app/ui-src:"; \
     ls -R /app/ui-src; \
     exit 1; \
     fi; \
     rm -rf /app/ui-src
-# Fail-fast si index.html manquant
+
 RUN [ -f "/ui/index.html" ] || (echo "ERROR: /ui/index.html missing"; exit 1)
 
-# 4) Utilisateur non-root + permissions propres
+
 RUN addgroup -S nodegrp && adduser -S -D -h /app -G nodegrp nodeusr \
-    && mkdir -p /content \
-    && chown -R nodeusr:nodegrp /app /content /ui
+    && mkdir -p ${CONTENT_ROOT} \
+    && chown -R nodeusr:nodegrp /app ${CONTENT_ROOT} ${UI_ROOT}
 USER nodeusr
 
-# 5) CLEANUP — réduire surface d’attaque et taille
-RUN find /ui -type f -name "*.map" -delete || true \
+
+RUN find ${UI_ROOT} -type f -name "*.map" -delete || true \
     && rm -rf /usr/local/share/.cache /home/node/.npm /home/nodeusr/.npm /root/.npm || true \
     && rm -rf /usr/local/lib/node_modules/npm/{docs,doc,html,man} || true
 

@@ -1,5 +1,4 @@
 <nav class="explorer">
-  <!-- Barre de recherche -->
   <mat-form-field class="search" appearance="outline">
     <mat-icon matPrefix aria-hidden="true">search</mat-icon>
     <input
@@ -21,9 +20,7 @@
 
   <mat-divider class="sep"></mat-divider>
 
-  <!-- Arbre -->
   @if (filteredTree()) {
-  <!-- Racine : on affiche ses enfants. multi=true autorise plusieurs dossiers ouverts -->
   <div class="tree">
     <mat-accordion [multi]="true" class="level">
       @for (n of filteredTree()!.children; track n.path) {
@@ -46,10 +43,10 @@
       <mat-expansion-panel-header class="node-header" role="button" aria-label="Ouvrir le dossier">
         <mat-panel-title>
           <mat-icon class="ico folder-ico">folder</mat-icon>
-          <span class="label">{{ n.name || 'root' }}</span>
+          <span class="label">{{ capitalize(n.name || 'root') }}</span>
         </mat-panel-title>
         <mat-panel-description>
-          <mat-icon class="chev" aria-hidden="true">unfold_more</mat-icon>
+          <mat-icon class="chev" aria-hidden="true">keyboard_arrow_down</mat-icon>
         </mat-panel-description>
       </mat-expansion-panel-header>
 
@@ -65,10 +62,9 @@
       </div>
     </mat-expansion-panel>
     } @else {
-    <!-- Fichier -->
     <a class="node file" [routerLink]="['/p', n.path]" aria-label="Ouvrir le fichier">
       <mat-icon class="ico file-ico">description</mat-icon>
-      <span class="label">{{ n.name }}</span>
+      <span class="label">{{ capitalize(n.name) }}</span>
     </a>
     }
   </ng-template>

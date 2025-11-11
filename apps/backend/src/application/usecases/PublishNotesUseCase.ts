@@ -51,7 +51,7 @@ export class PublishNotesUseCase {
         const fullHtml = this.buildHtmlPage(note, bodyHtml);
 
         await this.contentStorage.savePage({
-          route: `${note.route}/${note.relativePath}`,
+          route: `${note.route}`,
           html: fullHtml,
         });
 

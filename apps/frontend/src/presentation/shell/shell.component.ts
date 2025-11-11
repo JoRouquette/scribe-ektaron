@@ -37,6 +37,8 @@ type Crumb = { label: string; url: string };
   styleUrls: ['./shell.component.scss'],
 })
 export class ShellComponent implements OnInit {
+  // currentYear = new Date().getFullYear();
+
   readonly theme = inject(ThemeService);
   private readonly config = inject(ConfigFacade);
   private readonly catalog = inject(CatalogFacade);
