@@ -1,3 +1,10 @@
+## <small>1.1.4 (2025-11-11)</small>
+
+* build: better docker ([e7ef3ae](https://github.com/JoRouquette/scribe-ektaron/commit/e7ef3ae))
+* fix: site navigation throughout rendered markdown ([37ffbb0](https://github.com/JoRouquette/scribe-ektaron/commit/37ffbb0))
+* Merge branch 'main' of https://github.com/JoRouquette/scribe-ektaron ([d242256](https://github.com/JoRouquette/scribe-ektaron/commit/d242256))
+* chore: complete fix ([1085f2e](https://github.com/JoRouquette/scribe-ektaron/commit/1085f2e))
+
 ## <small>1.1.3 (2025-11-11)</small>
 
 * fix: grid layout ([c447992](https://github.com/JoRouquette/scribe-ektaron/commit/c447992))
