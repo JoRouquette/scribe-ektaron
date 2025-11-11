@@ -1,6 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { SafeHtml } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { Component, signal, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Subscription, switchMap, map, distinctUntilChanged } from 'rxjs';
+import { CatalogFacade } from '../../../application/facades/CatalogFacade';
 
 @Component({
   standalone: true,
@@ -8,20 +11,47 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './viewer.component.html',
   styleUrls: ['./viewer.component.scss'],
 })
-export class ViewerComponent {
-  private route = inject(ActivatedRoute);
-
+export class ViewerComponent implements OnDestroy {
   title = signal<string>('');
   html = signal<SafeHtml>('Chargement…' as any);
-  slug = '';
 
-  constructor() {
-    this.route.paramMap.subscribe((pm) => {
-      this.slug = pm.get('slug') ?? '';
-    });
+  private sub = new Subscription();
 
-    this.route.data.subscribe((d) => {
-      if (typeof d['title'] === 'string') this.title.set(d['title']);
-    });
+  constructor(
+    private readonly router: Router,
+    private readonly http: HttpClient,
+    private readonly sanitizer: DomSanitizer,
+    private readonly catalog: CatalogFacade
+  ) {
+    const s = this.router.events
+      .pipe(
+        map(() => this.router.url.split('?')[0].split('#')[0]),
+        distinctUntilChanged(),
+        switchMap((routePath) => {
+          const normalized = routePath.replace(/\/+$/, '') || '/';
+          const htmlUrl = normalized === '/' ? '/index.html' : `${normalized}.html`;
+
+          const m = this.catalog.manifest?.();
+          if (m?.pages?.length) {
+            const p = m.pages.find((x) => x.route === normalized);
+            this.title.set(p?.title ?? '');
+          } else {
+            const last = normalized.split('/').filter(Boolean).pop();
+            this.title.set(last ? decodeURIComponent(last) : '');
+          }
+
+          return this.http.get(htmlUrl, { responseType: 'text' });
+        })
+      )
+      .subscribe({
+        next: (raw) => this.html.set(this.sanitizer.bypassSecurityTrustHtml(raw)),
+        error: () => this.html.set(this.sanitizer.bypassSecurityTrustHtml('<p>Introuvable.</p>')),
+      });
+
+    this.sub.add(s);
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 }

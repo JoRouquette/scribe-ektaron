@@ -37,12 +37,14 @@ type Crumb = { label: string; url: string };
   styleUrls: ['./shell.component.scss'],
 })
 export class ShellComponent implements OnInit {
-  // currentYear = new Date().getFullYear();
+  currentYear = new Date().getFullYear();
 
-  readonly theme = inject(ThemeService);
-  private readonly config = inject(ConfigFacade);
-  private readonly catalog = inject(CatalogFacade);
-  private readonly router = inject(Router);
+  constructor(
+    readonly theme: ThemeService,
+    private readonly config: ConfigFacade,
+    private readonly catalog: CatalogFacade,
+    private readonly router: Router
+  ) {}
 
   author = () => this.config.cfg()?.author ?? '';
   siteName = () => this.config.cfg()?.siteName ?? '';
@@ -74,17 +76,18 @@ export class ShellComponent implements OnInit {
 
   private updateFromUrl() {
     const url = this.router.url.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
-    const m = url.match(/^\/p\/(.+)$/);
-    if (!m) {
+
+    if (url === '/') {
       this._crumbs = [];
       this.currentTitle = '';
       return;
     }
 
-    const parts = m[1].split('/').filter(Boolean);
+    const parts = url.replace(/^\/+/, '').split('/').filter(Boolean);
+
     this._crumbs = parts.map((seg, i) => ({
       label: decodeURIComponent(seg),
-      url: '/p/' + parts.slice(0, i + 1).join('/'),
+      url: '/' + parts.slice(0, i + 1).join('/'),
     }));
 
     const manifest = this.catalog.manifest?.();

@@ -20,10 +20,10 @@
 
   <mat-divider class="sep"></mat-divider>
 
-  @if (filteredTree()) {
+  @if (filteredTree()?.children?.length) {
   <div class="tree">
     <mat-accordion [multi]="true" class="level">
-      @for (n of filteredTree()!.children; track n.path) {
+      @for (n of filteredTree()!.children!; track n.path) {
       <ng-container
         [ngTemplateOutlet]="nodeTpl"
         [ngTemplateOutletContext]="{ $implicit: n }"
@@ -35,15 +35,13 @@
   <p class="muted">Aucun contenu</p>
   }
 
-  <!-- Template récursif -->
   <ng-template #nodeTpl let-n>
     @if (isFolder(n)) {
-    <!-- Dossier -->
     <mat-expansion-panel class="node folder" hideToggle>
       <mat-expansion-panel-header class="node-header" role="button" aria-label="Ouvrir le dossier">
         <mat-panel-title>
           <mat-icon class="ico folder-ico">folder</mat-icon>
-          <span class="label">{{ capitalize(n.name || 'root') }}</span>
+          <span class="label">{{ n.label || n.name || 'root' }}</span>
         </mat-panel-title>
         <mat-panel-description>
           <mat-icon class="chev" aria-hidden="true">keyboard_arrow_down</mat-icon>
@@ -52,7 +50,7 @@
 
       <div class="children">
         <mat-accordion [multi]="true" class="level">
-          @for (c of n.children; track c.path) {
+          @for (c of n.children!; track c.path) {
           <ng-container
             [ngTemplateOutlet]="nodeTpl"
             [ngTemplateOutletContext]="{ $implicit: c }"
@@ -62,9 +60,9 @@
       </div>
     </mat-expansion-panel>
     } @else {
-    <a class="node file" [routerLink]="['/p', n.path]" aria-label="Ouvrir le fichier">
+    <a class="node file" [routerLink]="['/', n.path]" aria-label="Ouvrir le fichier">
       <mat-icon class="ico file-ico">description</mat-icon>
-      <span class="label">{{ capitalize(n.name) }}</span>
+      <span class="label">{{ n.label }}</span>
     </a>
     }
   </ng-template>

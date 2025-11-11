@@ -5,7 +5,8 @@ import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class HttpHtmlGateway implements HtmlGateway {
-  private http = inject(HttpClient);
+  constructor(private http: HttpClient) {}
+
   fetch(path: string): Promise<string> {
     return firstValueFrom(this.http.get(path, { responseType: 'text' }));
   }

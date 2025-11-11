@@ -29,19 +29,14 @@ import { BuildTreeUseCase, TreeNode } from '../../../application/usecases/BuildT
   styleUrls: ['./vault-explorer.component.scss'],
 })
 export class VaultExplorerComponent {
-  private readonly facade = inject(CatalogFacade);
-  private readonly build = new BuildTreeUseCase();
-
   tree = signal<TreeNode | null>(null);
-
   q = signal<string>('');
 
   filteredTree = computed(() => this.filterTree(this.tree(), this.q().trim().toLowerCase()));
 
-  constructor() {
+  constructor(private readonly facade: CatalogFacade, private readonly build: BuildTreeUseCase) {
     this.facade.ensureManifest().then(() => {
       const m = this.facade.manifest();
-      console.log('Building vault tree from manifest with', m?.pages?.length ?? 0, 'pages');
       this.tree.set(m ? this.build.exec(m) : null);
     });
   }
@@ -51,34 +46,26 @@ export class VaultExplorerComponent {
   }
 
   isFolder(n: TreeNode): boolean {
-    return !!(n.children && n.children.length);
+    return n.kind === 'folder';
   }
 
-  capitalize(s: string): string {
-    if (!s) return s;
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
-
-  /** Filtrage récursif : garde le dossier si lui-même ou un descendant match. */
   private filterTree(node: TreeNode | null, q: string): TreeNode | null {
     if (!node) return null;
     if (!q) return node;
 
-    const name = (node.name || 'root').toLowerCase();
-    const selfMatch = name.includes(q);
+    const selfMatch = (node.label || node.name).toLowerCase().includes(q);
 
-    if (!node.children?.length) {
+    if (node.kind === 'file') {
       return selfMatch ? node : null;
     }
 
-    const filteredChildren = node.children
-      .map((child) => this.filterTree(child, q))
+    const children = (node.children ?? [])
+      .map((c) => this.filterTree(c, q))
       .filter((x): x is TreeNode => !!x);
 
-    if (selfMatch || filteredChildren.length > 0) {
-      return { ...node, children: filteredChildren };
+    if (selfMatch || children.length) {
+      return { ...node, children };
     }
-
     return null;
   }
 }

@@ -1,20 +1,26 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpManifestRepository } from '../../infrastructure/http/HttpManifestRepository';
+import { computed, Inject, Injectable, signal } from '@angular/core';
+import { Manifest } from '../../domain/models/Manifest';
+import { HtmlGateway } from '../../domain/ports/HtmlGateway';
+import { ManifestRepository } from '../../domain/ports/ManifestRepository';
+import { HTML_GATEWAY, MANIFEST_REPOSITORY } from '../../domain/ports/tokens';
+import { FindPageUseCase } from '../usecases/FindPage.usecase';
 import { LoadManifestUseCase } from '../usecases/LoadManifest.usecase';
 import { SearchPagesUseCase } from '../usecases/SearchPages.usecase';
-import { FindPageUseCase } from '../usecases/FindPage.usecase';
-import { HtmlGateway } from '../../domain/ports/HtmlGateway';
-import { HttpHtmlGateway } from '../../infrastructure/http/HttpHtmlGateway';
-import { Manifest } from '../../domain/models/Manifest';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogFacade {
-  private manifestRepo = inject(HttpManifestRepository);
-  private html = inject<HtmlGateway>(HttpHtmlGateway);
+  private loadManifest: LoadManifestUseCase;
+  private searchUc: SearchPagesUseCase;
+  private findUc: FindPageUseCase;
 
-  private loadManifest = new LoadManifestUseCase(this.manifestRepo);
-  private searchUc = new SearchPagesUseCase();
-  private findUc = new FindPageUseCase();
+  constructor(
+    @Inject(MANIFEST_REPOSITORY) private manifestRepo: ManifestRepository,
+    @Inject(HTML_GATEWAY) private html: HtmlGateway
+  ) {
+    this.loadManifest = new LoadManifestUseCase(this.manifestRepo);
+    this.searchUc = new SearchPagesUseCase();
+    this.findUc = new FindPageUseCase();
+  }
 
   // State
   manifest = signal<Manifest | null>(null);

@@ -1,5 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed } from '@angular/core';
 
 // Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,12 +35,9 @@ type Section = {
   styleUrls: [`./home.component.scss`],
 })
 export class HomeComponent {
-  facade = inject(CatalogFacade);
-
-  constructor() {
+  constructor(public facade: CatalogFacade) {
     this.facade.ensureManifest();
   }
-
   onQueryInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.facade.query.set(value);
@@ -77,10 +73,10 @@ export class HomeComponent {
         undefined;
 
       let link: Section['link'] = { segments: [], disabled: true };
-      if (landing?.slug?.value) {
-        link = { segments: ['/p', landing.slug.value] };
-      } else if (g.children[0]?.slug?.value) {
-        link = { segments: ['/p', g.children[0].slug.value] };
+      if (landing?.route) {
+        link = { segments: [landing.route] };
+      } else if (g.children[0]?.route) {
+        link = { segments: [g.children[0].route] };
       }
 
       list.push({

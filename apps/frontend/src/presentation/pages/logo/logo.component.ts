@@ -10,7 +10,7 @@ import { ThemeService } from '../../services/theme.service';
   styleUrls: ['./logo.component.scss'],
 })
 export class LogoComponent {
-  private readonly theme = inject(ThemeService);
+  constructor(private readonly theme: ThemeService) {}
 
   readonly src = computed(() =>
     this.theme.isDark()

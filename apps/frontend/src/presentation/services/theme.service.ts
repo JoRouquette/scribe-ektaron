@@ -9,7 +9,6 @@ export class ThemeService {
   isDark = () => this._isDark();
 
   init() {
-    // Choix initial : localStorage > prefers-color-scheme
     const saved = localStorage.getItem(STORAGE_KEY) as 'light' | 'dark' | null;
     const preferDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
     this.setTheme(saved ?? (preferDark ? 'dark' : 'light'));
@@ -24,7 +23,6 @@ export class ThemeService {
     const root = document.documentElement; // <html>
     root.classList.remove('theme-light', 'theme-dark');
     root.classList.add(mode === 'dark' ? 'theme-dark' : 'theme-light');
-    // Hint navigateur pour formulaires/scrollbars
     root.style.colorScheme = mode;
     localStorage.setItem(STORAGE_KEY, mode);
   }

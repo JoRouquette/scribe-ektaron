@@ -1,7 +1,7 @@
 import { Slug } from '../value-objects/Slug';
 
 export interface Page {
-  route: string; // ex: "/p/demo"
+  route: string;
   title: string;
   tags: string[];
   filePath: string;

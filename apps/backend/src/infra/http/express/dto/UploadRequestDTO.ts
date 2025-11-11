@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// ex: "/blog/my-note" (>= 2 segments)
 const routeSchema = z
   .string()
   .regex(

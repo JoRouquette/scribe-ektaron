@@ -1,5 +1,3 @@
-import { PublishedPage } from '../../domain/entities/PublishedPage';
-
 export interface ManifestPage {
   route: string;
   title: string;

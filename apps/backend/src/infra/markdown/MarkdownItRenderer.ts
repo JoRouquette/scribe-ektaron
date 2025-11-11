@@ -6,7 +6,7 @@ export class MarkdownItRenderer implements MarkdownRendererPort {
 
   constructor() {
     this.md = new MarkdownIt({
-      html: false, // on désactive l’HTML brut pour limiter les XSS (sanitisation plus fine plus tard)
+      html: false,
       linkify: true,
       typographer: true,
     });
