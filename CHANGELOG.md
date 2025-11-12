@@ -1,3 +1,10 @@
+## <small>1.1.5 (2025-11-12)</small>
+
+* refactor: update for improved file upload and explorer UI ([0871361](https://github.com/JoRouquette/scribe-ektaron/commit/0871361))
+* fix: injection issue locally ([83f31eb](https://github.com/JoRouquette/scribe-ektaron/commit/83f31eb))
+* chore: add content to dockerignore ([626c9f0](https://github.com/JoRouquette/scribe-ektaron/commit/626c9f0))
+* chore: add content to dockerignore ([3557163](https://github.com/JoRouquette/scribe-ektaron/commit/3557163))
+
 ## <small>1.1.4 (2025-11-11)</small>
 
 * build: better docker ([e7ef3ae](https://github.com/JoRouquette/scribe-ektaron/commit/e7ef3ae))
