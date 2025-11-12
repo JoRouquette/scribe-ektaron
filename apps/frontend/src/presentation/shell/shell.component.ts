@@ -56,18 +56,20 @@ export class ShellComponent implements OnInit {
   private _crumbs: Crumb[] = [];
   crumbs = () => this._crumbs;
 
-  async ngOnInit() {
+  ngOnInit() {
     this.theme.init();
-    await this.config.ensure();
-    await this.catalog.ensureManifest?.();
-    this.router.events
-      .pipe(
-        filter((e) => e instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => this.updateFromUrl());
+    this.config.ensure().then(() => {
+      this.catalog.ensureManifest?.().then(() => {
+        this.router.events
+          .pipe(
+            filter((e) => e instanceof NavigationEnd),
+            takeUntilDestroyed(this.destroyRef)
+          )
+          .subscribe(() => this.updateFromUrl());
 
-    this.updateFromUrl();
+        this.updateFromUrl();
+      });
+    });
   }
 
   onCrumbClicked(crumb: Crumb) {

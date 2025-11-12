@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// ex: "/blog/my-note" (>= 2 segments)
 const routeSchema = z
   .string()
   .regex(
@@ -15,11 +16,11 @@ export const NoteDTO = z.object({
   frontmatter: z.object({
     title: z.string().min(1),
     description: z.string().optional(),
-    date: z.string().datetime().optional(),
+    date: z.iso.datetime().optional(),
     tags: z.array(z.string()).optional(),
   }),
-  publishedAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  publishedAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const UploadRequestDTO = z.object({

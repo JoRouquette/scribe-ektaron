@@ -2,10 +2,8 @@
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  /* Crucial pour ne pas forcer un overflow horizontal dans la grid */
   min-width: 0;
   min-height: 0;
-  /* pas d'overflow ici : le parent (.main) scrolle */
 }
 
 .viewer {
@@ -23,19 +21,16 @@
   }
 
   .content {
-    /* Anti-débordement horizontal sur contenus arbitraires */
     overflow-wrap: anywhere;
     word-break: break-word;
     inline-size: 100%;
     max-inline-size: 100%;
     min-inline-size: 0;
 
-    /* Typo de base */
     line-height: 1.6;
     color: var(--its-on-surface, var(--mat-sys-on-surface));
   }
 
-  /* Images, vidéos, SVG : jamais plus large que la zone, conservent le ratio */
   .content img,
   .content video,
   .content svg,
@@ -45,7 +40,6 @@
     height: auto;
   }
 
-  /* Iframes embarquées (ex: YouTube) : responsive */
   .content iframe {
     display: block;
     width: 100%;
@@ -54,7 +48,6 @@
     aspect-ratio: 16 / 9;
   }
 
-  /* Code inline & blocs */
   .content code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
     background: color-mix(in oklab, var(--mat-sys-surface-variant) 25%, transparent);
@@ -68,9 +61,10 @@
     background: color-mix(in oklab, var(--mat-sys-surface-variant) 30%, transparent);
     border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
     border-radius: 10px;
-    overflow: auto; /* scroll horizontal local si nécessaire */
+    overflow: auto;
     max-inline-size: 100%;
   }
+
   .content pre > code {
     background: transparent;
     padding: 0;
@@ -108,12 +102,11 @@
     text-underline-offset: 2px;
   }
 
-  /* Tables : pas d’overflow global, scroll local si trop large */
   .content table {
     border-collapse: collapse;
     width: 100%;
     max-inline-size: 100%;
-    /* Pour éviter le débordement dur, on laisse wrap, et on garde un scroll au besoin via l’enveloppe */
+
     display: block;
     overflow-x: auto;
     border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
@@ -127,13 +120,12 @@
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 45%, transparent);
     vertical-align: top;
-    white-space: normal; /* laisse le wrap */
+    white-space: normal;
   }
   .content tr:last-child td {
     border-bottom: 0;
   }
 
-  /* Médias petits : rapproche un peu les espacements */
   @media (max-width: 600px) {
     .content {
       line-height: 1.55;

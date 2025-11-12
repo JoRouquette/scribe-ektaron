@@ -68,12 +68,11 @@ RUN set -eux; \
     exit 1; \
     fi; \
     rm -rf /app/ui-src; \
-    [ -f "${UI_ROOT}/index.html" ]
+    [ -f "${UI_ROOT}/index.html" ]; \
+    addgroup -S nodegrp && adduser -S -D -h /app -G nodegrp nodeusr; \
+    mkdir -p "${CONTENT_ROOT}"; \
+    chown -R nodeusr:nodegrp /app "${CONTENT_ROOT}" "${UI_ROOT}"
 
-# ---- User non-root + permissions ----
-RUN addgroup -S nodegrp && adduser -S -D -h /app -G nodegrp nodeusr \
-    && mkdir -p "${CONTENT_ROOT}" \
-    && chown -R nodeusr:nodegrp /app "${CONTENT_ROOT}" "${UI_ROOT}"
 USER nodeusr
 
 # Nettoyage (cartes sourcemaps, caches)

@@ -15,8 +15,8 @@ export const NoteDtoSchema = z.object({
   relativePath: z.string(),
   markdown: z.string(),
   frontmatter: NoteFrontmatterSchema,
-  publishedAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  publishedAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export const UploadNotesRequestSchema = z.object({

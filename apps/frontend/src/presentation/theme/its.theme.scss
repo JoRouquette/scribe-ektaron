@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 
-:root.theme-light {
+.theme-light {
   --its-primary: #c14343;
   --its-on-primary: #ffffff;
   --its-secondary: #5599d0;
@@ -15,7 +15,7 @@
   --its-background: #eef3fd;
 }
 
-:root.theme-dark {
+.theme-dark {
   --its-primary: #c14343;
   --its-on-primary: #0b0f13;
   --its-secondary: #61afef;
@@ -53,6 +53,7 @@ $its-dark: mat.define-theme(
 :root.theme-light {
   @include mat.theme($its-light);
 }
+
 :root.theme-dark {
   @include mat.theme($its-dark);
 }

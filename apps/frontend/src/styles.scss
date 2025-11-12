@@ -3,6 +3,16 @@
 
 @include mat.core();
 
+:root.theme-light {
+  @include mat.theme($its-light);
+  color-scheme: light;
+}
+
+:root.theme-dark {
+  @include mat.theme($its-dark);
+  color-scheme: dark;
+}
+
 html,
 body {
   height: 100%;
@@ -13,15 +23,8 @@ body {
   color: var(--its-on-surface);
 }
 
-:root.theme-light {
-  color-scheme: light;
-}
-:root.theme-dark {
-  color-scheme: dark;
-}
-
 .material-symbols-rounded {
-  font-family: 'Material Symbols Rounded';
+  font-family: 'Material Symbols Rounded', sans-serif;
   font-weight: normal;
   font-style: normal;
   line-height: 1;

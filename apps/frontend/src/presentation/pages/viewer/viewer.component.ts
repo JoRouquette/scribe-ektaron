@@ -15,7 +15,7 @@ export class ViewerComponent implements OnDestroy {
   title = signal<string>('');
   html = signal<SafeHtml>('Chargement…' as any);
 
-  private sub = new Subscription();
+  private readonly sub = new Subscription();
 
   constructor(
     private readonly router: Router,
@@ -29,18 +29,24 @@ export class ViewerComponent implements OnDestroy {
         distinctUntilChanged(),
         switchMap((routePath) => {
           const normalized = routePath.replace(/\/+$/, '') || '/';
+          console.log('Loading HTML for route:', normalized);
+
           const htmlUrl = normalized === '/' ? '/index.html' : `${normalized}.html`;
+          console.log('Loading HTML from:', htmlUrl);
 
           const m = this.catalog.manifest?.();
+          console.log('Current manifest:', m);
+
           if (m?.pages?.length) {
             const p = m.pages.find((x) => x.route === normalized);
             this.title.set(p?.title ?? '');
           } else {
-            const last = normalized.split('/').filter(Boolean).pop();
+            const parts = normalized.split('/').filter(Boolean);
+            const last = parts.at(-1);
             this.title.set(last ? decodeURIComponent(last) : '');
           }
 
-          return this.http.get(htmlUrl, { responseType: 'text' });
+          return this.http.get(`content${htmlUrl}`, { responseType: 'text' });
         })
       )
       .subscribe({

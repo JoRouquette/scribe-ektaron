@@ -1,8 +1,27 @@
+:host {
+  --bg-surface: var(--its-surface, var(--mat-sys-surface));
+  --on-surface: var(--its-on-surface, var(--mat-sys-on-surface));
+  --surface-variant: var(--its-surface-variant, var(--mat-sys-surface-variant));
+  --outline: var(--its-outline, var(--mat-sys-outline));
+  --primary: var(--its-primary, var(--mat-sys-primary));
+  --secondary: var(--its-secondary, var(--mat-sys-secondary));
+  --tertiary: var(--its-tertiary, var(--mat-sys-tertiary));
+  --on-tertiary: var(--its-on-tertiary, var(--mat-sys-on-tertiary));
+}
+
 .explorer {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-width: 100%;
+  color: var(--on-surface);
+
+  a,
+  a:visited,
+  a:hover {
+    color: inherit;
+    text-decoration: none;
+  }
 
   .search {
     margin: 8px 8px 4px;
@@ -22,13 +41,12 @@
     min-width: 0;
   }
 
-  .node {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+  .node,
+  mat-tree-node,
+  mat-nested-tree-node {
+    display: block;
+    width: 100%;
     color: inherit;
-    text-decoration: none;
   }
 
   .folder {
@@ -36,22 +54,35 @@
     border-radius: 10px;
 
     .node-header {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: 8px;
       min-height: 40px;
       padding: 0 8px 0 6px;
+      width: 100%;
       border-radius: 10px;
-      background: color-mix(in oklab, var(--mat-sys-surface-variant) 12%, transparent);
-      border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 60%, transparent);
       cursor: pointer;
+
+      background: color-mix(in oklab, var(--surface-variant) 12%, transparent);
+      border: 1px solid color-mix(in oklab, var(--outline) 60%, transparent);
+
+      /* états */
+      &:hover {
+        background: color-mix(in oklab, var(--surface-variant) 18%, transparent);
+        border-color: color-mix(in oklab, var(--outline) 70%, transparent);
+      }
+      &:focus-visible {
+        outline: 2px solid color-mix(in oklab, var(--primary) 65%, transparent);
+        outline-offset: 1px;
+      }
     }
+
     .folder-ico {
-      color: var(--its-primary, var(--mat-sys-primary));
+      color: var(--primary);
       opacity: 0.95;
     }
     .chev {
-      margin-left: auto;
       transition: transform 0.18s ease;
     }
     &[aria-expanded='true'] .chev {
@@ -67,17 +98,26 @@
   }
 
   .file {
-    padding: 6px 8px;
     margin: 1px 4px 1px calc(8px + 2px);
     border-radius: 8px;
-    background: color-mix(in oklab, var(--mat-sys-surface-variant) 6%, transparent);
-    border: 1px solid color-mix(in oklab, var(--mat-sys-outline-variant) 45%, transparent);
+    background: color-mix(in oklab, var(--surface-variant) 6%, transparent);
+    border: 1px solid color-mix(in oklab, var(--outline) 45%, transparent);
+
     &:hover {
-      background: color-mix(in oklab, var(--mat-sys-surface-variant) 12%, transparent);
-      border-color: color-mix(in oklab, var(--mat-sys-outline-variant) 65%, transparent);
+      background: color-mix(in oklab, var(--surface-variant) 12%, transparent);
+      border-color: color-mix(in oklab, var(--outline) 65%, transparent);
+    }
+
+    .file-link {
+      display: grid;
+      grid-template-columns: auto 1fr; /* icône | label */
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      width: 100%;
     }
     .file-ico {
-      color: var(--its-secondary, var(--mat-sys-secondary));
+      color: var(--secondary);
       opacity: 0.95;
     }
   }
@@ -88,8 +128,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-left: 0.5rem;
+    min-width: 0; /* indispensable pour l’ellipsis en grid/flex */
   }
+
   .muted {
     opacity: 0.7;
     padding: 12px;

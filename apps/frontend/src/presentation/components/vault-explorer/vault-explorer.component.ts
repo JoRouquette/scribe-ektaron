@@ -1,5 +1,6 @@
+import { CdkTreeModule } from '@angular/cdk/tree';
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,32 +16,53 @@ import { BuildTreeUseCase, TreeNode } from '../../../application/usecases/BuildT
   standalone: true,
   selector: 'app-vault-explorer',
   imports: [
+    CdkTreeModule,
     CommonModule,
-    RouterLink,
-    MatTreeModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatDividerModule,
     MatButtonModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatTreeModule,
+    RouterLink,
   ],
   templateUrl: './vault-explorer.component.html',
   styleUrls: ['./vault-explorer.component.scss'],
 })
-export class VaultExplorerComponent {
+export class VaultExplorerComponent implements OnInit {
+  private visible = new WeakMap<TreeNode, TreeNode[]>();
   tree = signal<TreeNode | null>(null);
   q = signal<string>('');
+  readonly EMPTY: ReadonlyArray<TreeNode> = [];
+  rootChildren = computed(() => this.filteredRoot()?.children ?? (this.EMPTY as TreeNode[]));
 
-  childrenOf = (n: TreeNode) => n.children ?? [];
+  childrenOf = (n: TreeNode) => (this.q() ? this.visible.get(n) ?? [] : n.children ?? []);
   isFolder = (_: number, n: TreeNode) => n.kind === 'folder';
   isFile = (_: number, n: TreeNode) => n.kind === 'file';
+  trackByPath = (_: number, n: TreeNode) => n.path ?? (n.label || n.name);
 
-  filteredTree = computed(() => this.filterTree(this.tree(), this.q().trim().toLowerCase()));
+  filteredRoot = computed(() => {
+    const root = this.tree();
+    if (!root) return null;
 
-  constructor(private readonly facade: CatalogFacade, private readonly build: BuildTreeUseCase) {
+    const query = this.q().trim().toLowerCase();
+    this.visible = new WeakMap<TreeNode, TreeNode[]>();
+
+    if (!query) return root;
+
+    this.markVisible(root, query);
+    return root;
+  });
+
+  constructor(
+    private readonly facade: CatalogFacade,
+    private readonly buildTree: BuildTreeUseCase
+  ) {}
+
+  ngOnInit(): void {
     this.facade.ensureManifest().then(() => {
       const m = this.facade.manifest();
-      this.tree.set(m ? this.build.exec(m) : null);
+      this.tree.set(m ? this.buildTree.exec(m) : null);
     });
   }
 
@@ -48,14 +70,20 @@ export class VaultExplorerComponent {
     this.q.set(value ?? '');
   }
 
-  private filterTree(node: TreeNode | null, q: string): TreeNode | null {
-    if (!node) return null;
-    if (!q) return node;
+  private markVisible(node: TreeNode, q: string): boolean {
     const selfMatch = (node.label || node.name).toLowerCase().includes(q);
-    if (node.kind === 'file') return selfMatch ? node : null;
-    const children = (node.children ?? [])
-      .map((c) => this.filterTree(c, q))
-      .filter((x): x is TreeNode => !!x);
-    return selfMatch || children.length ? { ...node, children } : null;
+
+    if (node.kind === 'file') return selfMatch;
+
+    const kids = node.children ?? [];
+    const vis: TreeNode[] = [];
+    for (const c of kids) {
+      if (this.markVisible(c, q)) vis.push(c);
+    }
+    if (selfMatch || vis.length) {
+      this.visible.set(node, vis);
+      return true;
+    }
+    return false;
   }
 }

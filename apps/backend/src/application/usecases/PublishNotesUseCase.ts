@@ -49,7 +49,6 @@ export class PublishNotesUseCase {
         vaultPath: n.vaultPath,
         relativePath: n.relativePath,
         title: this.extractTitle(n.vaultPath),
-        description: n.frontmatter.description,
         tags: n.frontmatter.tags,
         publishedAt: n.publishedAt,
         updatedAt: n.updatedAt,
@@ -65,18 +64,11 @@ export class PublishNotesUseCase {
   }
 
   private buildHtmlPage(note: Note, bodyHtml: string): string {
-    const description = note.frontmatter.description
-      ? this.escapeHtml(note.frontmatter.description)
-      : '';
-    const publishedAt = note.publishedAt.toISOString();
-
     return `
   <div class="markdown-body">
-    <header class="site-header">
-      <a href="/" class="home-link">Scribe Ektaron</a>
-      ${description ? `<p class="site-tagline">${description}</p>` : '<p class="site-tagline">Publication personnelle</p>'}
-      <p class="site-meta">Publié le ${this.escapeHtml(publishedAt.substring(0, 10))}</p>
-    </header>
+    <div class="page-header">
+      <h1 class="site-title">${this.escapeHtml(this.extractTitle(note.vaultPath))}</h1>
+    </div>
     <article class="page-content">
 ${bodyHtml}
     </article>
@@ -85,17 +77,18 @@ ${bodyHtml}
 
   private escapeHtml(value: string): string {
     return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
   }
 
   private extractTitle(vaultPath: string): any {
     const parts = vaultPath.split('/');
-    const filename = parts[parts.length - 1];
-    const title = filename.replace(/\.mdx?$/i, '').replace(/-/g, ' ');
+    const filename = parts.at(-1) || 'Untitled';
+    const title = filename.replace(/\.mdx?$/i, '');
+
     return title.charAt(0).toUpperCase() + title.slice(1);
   }
 }

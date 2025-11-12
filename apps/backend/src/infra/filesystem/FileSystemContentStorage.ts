@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import type { ContentStoragePort } from '../../application/ports/ContentStoragePort';
 
 type SavePageParams = { route: string; html: string; slug?: string };
@@ -19,7 +19,7 @@ export class FileSystemContentStorage implements ContentStoragePort {
       return;
     }
 
-    const fileSlug = params.slug ? this.slugify(params.slug) : this.slugify(segs[segs.length - 1]);
+    const fileSlug = params.slug ? this.slugify(params.slug) : this.slugify(segs.at(-1) || 'index');
     const fileSegments = [...segs.slice(0, -1), `${fileSlug}.html`];
     const filePath = path.join(this.rootDir, ...fileSegments);
 
@@ -38,10 +38,10 @@ export class FileSystemContentStorage implements ContentStoragePort {
   private slugify(input: string): string {
     const ascii = input
       .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/[^\w\s-]/g, ' ')
+      .replaceAll(/\p{Diacritic}/gu, '')
+      .replaceAll(/[^\w\s-]/g, ' ')
       .trim()
-      .replace(/\s+/g, '-')
+      .replaceAll(/\s+/g, '-')
       .toLowerCase();
     return ascii || 'index';
   }

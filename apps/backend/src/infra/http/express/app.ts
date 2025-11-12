@@ -2,7 +2,7 @@ import express from 'express';
 import type { PublishNotesUseCase } from '../../../application/usecases/PublishNotesUseCase';
 import { createUploadController } from './controllers/uploadController';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuth';
-import path from 'path';
+import path from 'node:path';
 
 export interface CreateAppOptions {
   uiRoot: string;

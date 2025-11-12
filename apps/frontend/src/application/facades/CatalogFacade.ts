@@ -9,13 +9,13 @@ import { SearchPagesUseCase } from '../usecases/SearchPages.usecase';
 
 @Injectable({ providedIn: 'root' })
 export class CatalogFacade {
-  private loadManifest: LoadManifestUseCase;
-  private searchUc: SearchPagesUseCase;
-  private findUc: FindPageUseCase;
+  private readonly loadManifest: LoadManifestUseCase;
+  private readonly searchUc: SearchPagesUseCase;
+  private readonly findUc: FindPageUseCase;
 
   constructor(
-    @Inject(MANIFEST_REPOSITORY) private manifestRepo: ManifestRepository,
-    @Inject(HTML_GATEWAY) private html: HtmlGateway
+    @Inject(MANIFEST_REPOSITORY) private readonly manifestRepo: ManifestRepository,
+    @Inject(HTML_GATEWAY) private readonly html: HtmlGateway
   ) {
     this.loadManifest = new LoadManifestUseCase(this.manifestRepo);
     this.searchUc = new SearchPagesUseCase();
@@ -40,8 +40,10 @@ export class CatalogFacade {
     try {
       const m = await this.loadManifest.exec();
       this.manifest.set(m);
-    } catch (e: any) {
-      this.error.set('Manifest indisponible');
+    } catch (e) {
+      this.error.set(
+        'Manifest indisponible pour le moment :' + (e instanceof Error ? ' ' + e.message : '')
+      );
     } finally {
       this.loading.set(false);
     }
