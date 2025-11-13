@@ -1,5 +1,5 @@
 module.exports = {
-  branches: [{ name: 'main' }], // trunk-based: une seule branche
+  branches: [{ name: 'main' }],
   plugins: [
     [
       '@semantic-release/commit-analyzer',
