@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { LoggerPort } from '../../../../application/ports/LoggerPort';
 
-export function createCorsMiddleware(allowedOrigins: string[]) {
+export function createCorsMiddleware(allowedOrigins: string[], logger?: LoggerPort) {
   const allowAll = allowedOrigins.includes('*');
 
   return function corsMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -9,12 +10,16 @@ export function createCorsMiddleware(allowedOrigins: string[]) {
     if (origin && (allowAll || allowedOrigins.includes(origin))) {
       res.header('Access-Control-Allow-Origin', origin);
       res.header('Vary', 'Origin');
+      logger?.debug('CORS allowed for origin', { origin });
+    } else if (origin) {
+      logger?.warn('CORS denied for origin', { origin });
     }
 
     res.header('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
 
     if (req.method === 'OPTIONS') {
+      logger?.info('CORS preflight request handled', { origin, method: req.method });
       return res.sendStatus(200);
     }
 

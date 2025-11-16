@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'node:path';
 import { createPingController } from './controllers/pingController';
 import { createUploadController } from './controllers/uploadController';
 import { createAssetsUploadController } from './controllers/assetsUploadController';
@@ -15,6 +14,7 @@ import { UploadAssetUseCase } from '../../../application/usecases/UploadAssetUse
 import { EnvConfig } from '../../config/EnvConfig';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
+import { ConsoleLogger } from '../../logging/ConsoleLogger';
 
 export function createApp() {
   const app = express();
@@ -28,23 +28,52 @@ export function createApp() {
   app.use('/assets', express.static(EnvConfig.assetsRoot()));
 
   // Construct use cases & adapters
-  const markdownRenderer = new MarkdownItRenderer();
-  const contentStorage = new FileSystemContentStorage(EnvConfig.contentRoot());
-  const siteIndex = new FileSystemSiteIndex(EnvConfig.contentRoot());
-  const assetStorage = new FileSystemAssetStorage(EnvConfig.assetsRoot());
+  const rootLogger = new ConsoleLogger({ level: EnvConfig.loggerLevel() });
 
-  const publishNotesUseCase = new PublishNotesUseCase(markdownRenderer, contentStorage, siteIndex);
-  const uploadAssetUseCase = new UploadAssetUseCase(assetStorage);
+  const markdownRenderer = new MarkdownItRenderer();
+  const contentStorage = new FileSystemContentStorage(
+    EnvConfig.contentRoot(),
+    rootLogger.child({ adapter: 'FileSystemContentStorage' })
+  );
+  const siteIndex = new FileSystemSiteIndex(
+    EnvConfig.contentRoot(),
+    rootLogger.child({ adapter: 'FileSystemSiteIndex' })
+  );
+  const assetStorage = new FileSystemAssetStorage(
+    EnvConfig.assetsRoot(),
+    rootLogger.child({ adapter: 'FileSystemAssetStorage' })
+  );
+
+  const publishNotesUseCase = new PublishNotesUseCase(
+    markdownRenderer,
+    contentStorage,
+    siteIndex,
+    rootLogger.child({ useCase: 'PublishNotesUseCase' })
+  );
+  const uploadAssetUseCase = new UploadAssetUseCase(
+    assetStorage,
+    rootLogger.child({ useCase: 'UploadAssetUseCase' })
+  );
 
   // API routes (protégées par API key)
   const apiRouter = express.Router();
   apiRouter.use(apiKeyMiddleware);
 
-  apiRouter.use(createPingController());
-  apiRouter.use(createUploadController(publishNotesUseCase));
-  apiRouter.use(createAssetsUploadController(uploadAssetUseCase));
+  apiRouter.use(createPingController(rootLogger.child({ controller: 'pingController' })));
+  apiRouter.use(
+    createUploadController(
+      publishNotesUseCase,
+      rootLogger.child({ controller: 'uploadController' })
+    )
+  );
+  apiRouter.use(
+    createAssetsUploadController(
+      uploadAssetUseCase,
+      rootLogger.child({ controller: 'assetsUploadController' })
+    )
+  );
 
   app.use('/api', apiRouter);
 
-  return { app, EnvConfig };
+  return { app, EnvConfig, logger: rootLogger };
 }

@@ -36,4 +36,12 @@ export class EnvConfig {
   static nodeEnv(): string {
     return this.norm(process.env.NODE_ENV) || 'development';
   }
+
+  static loggerLevel(): 'debug' | 'info' | 'warn' | 'error' {
+    const level = this.norm(process.env.LOGGER_LEVEL).toLowerCase();
+    if (level === 'debug' || level === 'info' || level === 'warn' || level === 'error') {
+      return level;
+    }
+    return 'info';
+  }
 }

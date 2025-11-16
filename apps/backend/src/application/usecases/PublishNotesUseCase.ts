@@ -1,4 +1,5 @@
 import type { Note } from '../../domain/entities/Note';
+import { LoggerPort } from '../ports/LoggerPort';
 import type { MarkdownRendererPort } from '../ports/MarkdownRendererPort';
 import type { Manifest, ManifestPage, SiteIndexPort } from '../ports/SiteIndexPort';
 import type { StoragePort } from '../ports/StoragePort';
@@ -16,7 +17,8 @@ export class PublishNotesUseCase {
   constructor(
     private readonly markdownRenderer: MarkdownRendererPort,
     private readonly contentStorage: StoragePort,
-    private readonly siteIndex: SiteIndexPort
+    private readonly siteIndex: SiteIndexPort,
+    private readonly logger: LoggerPort
   ) {}
 
   async execute(input: PublishNotesInput): Promise<PublishNotesOutput> {
@@ -24,12 +26,19 @@ export class PublishNotesUseCase {
     const errors: { noteId: string; message: string }[] = [];
     const succeeded: Note[] = [];
 
+    const logger = this.logger.child({ useCase: 'PublishNotesUseCase' });
+    logger.info(`Starting publishing of ${input.notes.length} notes`);
+
     for (const note of input.notes) {
+      const noteLogger = logger.child({ noteId: note.id, slug: note.slug });
       try {
+        noteLogger.debug('Rendering markdown');
         const bodyHtml = await this.markdownRenderer.render(note.markdown);
+        noteLogger.debug('Building HTML page');
         const fullHtml = this.buildHtmlPage(note, bodyHtml);
 
         const pageRoute = this.buildPageRoute(note);
+        noteLogger.debug('Saving content to storage', { route: pageRoute });
 
         await this.contentStorage.save({
           route: pageRoute,
@@ -38,13 +47,16 @@ export class PublishNotesUseCase {
 
         published++;
         succeeded.push(note);
+        noteLogger.info('Note published successfully', { route: pageRoute });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         errors.push({ noteId: note.id, message });
+        noteLogger.error('Failed to publish note', { error: message });
       }
     }
 
     if (succeeded.length > 0) {
+      logger.info(`Updating site manifest and indexes for ${succeeded.length} published notes`);
       const pages: ManifestPage[] = succeeded.map((n) => {
         const route = this.buildPageRoute(n);
 
@@ -65,6 +77,12 @@ export class PublishNotesUseCase {
       const manifest: Manifest = { pages };
       await this.siteIndex.saveManifest(manifest);
       await this.siteIndex.rebuildAllIndexes(manifest);
+      logger.info('Site manifest and indexes updated');
+    }
+
+    logger.info(`Publishing complete: ${published} notes published, ${errors.length} errors`);
+    if (errors.length > 0) {
+      logger.warn('Some notes failed to publish', { errors });
     }
 
     return { published, errors };

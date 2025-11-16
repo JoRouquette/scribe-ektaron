@@ -1,10 +1,10 @@
 import { createApp } from './infra/http/express/app';
 
 async function bootstrap() {
-  const { app, EnvConfig } = createApp();
+  const { app, EnvConfig, logger } = createApp();
 
   app.listen(EnvConfig.port(), () => {
-    console.log(`Server listening on port ${EnvConfig.port()}`);
+    logger.info(`Server listening on port ${EnvConfig.port()}`);
   });
 }
 

@@ -1,10 +1,12 @@
 import { Router, Request, Response } from 'express';
+import { LoggerPort } from '../../../../application/ports/LoggerPort';
 
-export function createPingController(): Router {
+export function createPingController(logger?: LoggerPort): Router {
   const router = Router();
 
   router.get('/ping', (req: Request, res: Response) => {
-    return res.json({ status: 'ok' });
+    logger?.info('Received ping request', { path: req.path, method: req.method });
+    return res.status(200).json({ api: 'ok' });
   });
 
   return router;

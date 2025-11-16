@@ -30,6 +30,7 @@ FROM node:20.19.0-alpine3.20 AS runtime
 
 ENV NODE_ENV=production \
     PORT=3000 \
+    LOGGER_LEVEL=debug \
     CONTENT_ROOT=/content \
     ASSETS_ROOT=/assets \
     UI_ROOT=/ui \
