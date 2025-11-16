@@ -3,6 +3,7 @@ import type { PublishNotesUseCase } from '../../../application/usecases/PublishN
 import { createUploadController } from './controllers/uploadController';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuth';
 import path from 'node:path';
+import { stat } from 'node:fs';
 
 export interface CreateAppOptions {
   uiRoot: string;
@@ -23,6 +24,7 @@ export function createApp(options: CreateAppOptions) {
   app.get(`${apiBase}/ping`, (_req, res) => {
     res.json({
       ok: true,
+      status: 200,
       service: 'personal-publish',
       version: '1.0.0',
       timestamp: new Date().toISOString(),
