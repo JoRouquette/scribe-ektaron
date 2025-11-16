@@ -1,20 +1,21 @@
 import express from 'express';
+import path from 'node:path';
+import { createAssetsUploadController } from './controllers/assetsUploadController';
 import { createPingController } from './controllers/pingController';
 import { createUploadController } from './controllers/uploadController';
-import { createAssetsUploadController } from './controllers/assetsUploadController';
 
 // Adapters / services
-import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
+import { FileSystemAssetStorage } from '../../filesystem/FileSystemAssetStorage';
 import { FileSystemContentStorage } from '../../filesystem/FileSystemContentStorage';
 import { FileSystemSiteIndex } from '../../filesystem/FileSystemSiteIndex';
-import { FileSystemAssetStorage } from '../../filesystem/FileSystemAssetStorage';
+import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
 
 import { PublishNotesUseCase } from '../../../application/usecases/PublishNotesUseCase';
 import { UploadAssetUseCase } from '../../../application/usecases/UploadAssetUseCase';
 import { EnvConfig } from '../../config/EnvConfig';
-import { createCorsMiddleware } from './middleware/corsMiddleware';
-import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { ConsoleLogger } from '../../logging/ConsoleLogger';
+import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
+import { createCorsMiddleware } from './middleware/corsMiddleware';
 
 export function createApp() {
   const app = express();
@@ -26,6 +27,7 @@ export function createApp() {
 
   // Static assets
   app.use('/assets', express.static(EnvConfig.assetsRoot()));
+  app.use('/content', express.static(EnvConfig.contentRoot()));
 
   // Construct use cases & adapters
   const rootLogger = new ConsoleLogger({ level: EnvConfig.loggerLevel() });
@@ -74,6 +76,13 @@ export function createApp() {
   );
 
   app.use('/api', apiRouter);
+
+  const ANGULAR_DIST = EnvConfig.uiRoot();
+  app.use(express.static(ANGULAR_DIST));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(ANGULAR_DIST, 'index.html'));
+  });
 
   return { app, EnvConfig, logger: rootLogger };
 }
