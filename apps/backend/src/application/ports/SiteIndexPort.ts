@@ -1,4 +1,7 @@
+import { LoggerPort } from './LoggerPort';
+
 export interface ManifestPage {
+  id: string;
   route: string;
   title: string;
   description?: string;
@@ -16,7 +19,7 @@ export interface Manifest {
  * Gestion de l'indexation du site (manifest + index des dossiers).
  */
 export interface SiteIndexPort {
-  saveManifest(manifest: Manifest): Promise<void>;
+  saveManifest(manifest: Manifest, logger?: LoggerPort): Promise<void>;
 
-  rebuildAllIndexes(manifest: Manifest): Promise<void>;
+  rebuildAllIndexes(manifest: Manifest, logger?: LoggerPort): Promise<void>;
 }

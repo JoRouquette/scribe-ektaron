@@ -4,10 +4,6 @@ import type { MarkdownRendererPort } from '../ports/MarkdownRendererPort';
 import type { Manifest, ManifestPage, SiteIndexPort } from '../ports/SiteIndexPort';
 import type { StoragePort } from '../ports/StoragePort';
 
-export interface PublishNotesInput {
-  notes: Note[];
-}
-
 export interface PublishNotesOutput {
   published: number;
   errors: { noteId: string; message: string }[];
@@ -21,15 +17,15 @@ export class PublishNotesUseCase {
     private readonly logger?: LoggerPort
   ) {}
 
-  async execute(input: PublishNotesInput): Promise<PublishNotesOutput> {
+  async execute(notes: Note[]): Promise<PublishNotesOutput> {
     let published = 0;
     const errors: { noteId: string; message: string }[] = [];
     const succeeded: Note[] = [];
 
     const logger = this.logger?.child({ useCase: 'PublishNotesUseCase' });
-    logger?.info(`Starting publishing of ${input.notes.length} notes`);
+    logger?.info(`Starting publishing of ${notes.length} notes`);
 
-    for (const note of input.notes) {
+    for (const note of notes) {
       const noteLogger = logger?.child({ noteId: note.id, slug: note.slug });
       try {
         noteLogger?.debug('Rendering markdown');
@@ -57,9 +53,10 @@ export class PublishNotesUseCase {
     if (succeeded.length > 0) {
       logger?.info(`Updating site manifest and indexes for ${succeeded.length} published notes`);
       const pages: ManifestPage[] = succeeded.map((n) => {
-        const route = this.buildPageRoute(n);
+        const route = this.buildPageRoute(n, logger);
 
         return {
+          id: n.id,
           route,
           slug: n.slug,
           vaultPath: n.vaultPath,
@@ -74,8 +71,8 @@ export class PublishNotesUseCase {
       pages.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
       const manifest: Manifest = { pages };
-      await this.siteIndex.saveManifest(manifest);
-      await this.siteIndex.rebuildAllIndexes(manifest);
+      await this.siteIndex.saveManifest(manifest, logger);
+      await this.siteIndex.rebuildAllIndexes(manifest, logger);
       logger?.info('Site manifest and indexes updated');
     }
 
@@ -97,7 +94,7 @@ export class PublishNotesUseCase {
    *   slug = "thormak"
    * -> "/codex/puissances/divinites/thormak/"
    */
-  private buildPageRoute(note: Note): string {
+  private buildPageRoute(note: Note, logger?: LoggerPort): string {
     const rawRoute = (note.route ?? '').trim();
     const rawRelativePath = (note.relativePath ?? '').trim();
 
@@ -125,7 +122,7 @@ export class PublishNotesUseCase {
     return '/' + segments.join('/');
   }
 
-  private buildHtmlPage(note: Note, bodyHtml: string): string {
+  private buildHtmlPage(note: Note, bodyHtml: string, logger?: LoggerPort): string {
     // Tu peux étoffer ici (header/footer) si besoin ; pour l’instant on reste sur un fragment
     return `
   <div class="markdown-body">
@@ -133,7 +130,7 @@ export class PublishNotesUseCase {
   </div>`;
   }
 
-  private extractTitle(vaultPath: string | undefined): string {
+  private extractTitle(vaultPath: string | undefined, logger?: LoggerPort): string {
     if (!vaultPath) {
       return 'Untitled';
     }

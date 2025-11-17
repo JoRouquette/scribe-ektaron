@@ -38,10 +38,7 @@ export function createUploadController(
       log?.info?.('Received upload request', { notesCount: notes.length });
 
       const domainNotes = notes.map(mapDtoToDomainNote);
-
-      const result = await publishNotesUseCase.execute({
-        notes: domainNotes,
-      });
+      const result = await publishNotesUseCase.execute(domainNotes);
 
       log?.info?.('Notes published', { publishedCount: result.published });
 
