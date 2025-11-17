@@ -36,7 +36,7 @@ ENV NODE_ENV=production \
     UI_ROOT=/ui \
     API_PREFIX=/api \
     AUTHOR_NAME="Jonathan Rouquette" \
-    REPO_URL="https://github.com/jonathanrouquette/scribe-ektaron" 
+    REPO_URL="https://github.com/JoRouquette/scribe-ektaron" 
 
 # Paquets de base (wget pour healthcheck)
 RUN apk --no-cache upgrade && apk add --no-cache wget

@@ -63,6 +63,8 @@ export class ConsoleLogger implements LoggerPort {
 
     switch (level) {
       case 'debug':
+        console.debug(line);
+        break;
       case 'info':
         console.log(line);
         break;
