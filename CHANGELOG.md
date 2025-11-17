@@ -1,3 +1,21 @@
+## 1.2.0 (2025-11-17)
+
+* chore:start implementing a better viewer ([e2940e8](https://github.com/JoRouquette/scribe-ektaron/commit/e2940e8))
+* Merge branch 'feature/better-viewer' into release ([a1fd2ea](https://github.com/JoRouquette/scribe-ektaron/commit/a1fd2ea))
+* Merge branch 'release' ([8ef89bf](https://github.com/JoRouquette/scribe-ektaron/commit/8ef89bf))
+* fix: remove trailing slash from note URL in PublishNotesUseCase ([dd9950f](https://github.com/JoRouquette/scribe-ektaron/commit/dd9950f))
+* fix(api): add health check endpoint and controller ([e0b1dee](https://github.com/JoRouquette/scribe-ektaron/commit/e0b1dee))
+* fix(backend): add status field to /ping endpoint response in express app ([0ec4f16](https://github.com/JoRouquette/scribe-ektaron/commit/0ec4f16))
+* fix(express): serve Angular UI and content directory as static assets ([0dc030d](https://github.com/JoRouquette/scribe-ektaron/commit/0dc030d))
+* fix(logging): make logger optional and add structured logging to backend ([a1cfb14](https://github.com/JoRouquette/scribe-ektaron/commit/a1cfb14))
+* build: add husky ([9eb7156](https://github.com/JoRouquette/scribe-ektaron/commit/9eb7156))
+* build: complete dockerfile ([9b4820e](https://github.com/JoRouquette/scribe-ektaron/commit/9b4820e))
+* feat(backend): add asset upload API, refactor storage ports, improve test setup ([7c2568f](https://github.com/JoRouquette/scribe-ektaron/commit/7c2568f))
+* feat(ci): add GitHub Actions workflow to build and push Docker image ([6f930ee](https://github.com/JoRouquette/scribe-ektaron/commit/6f930ee))
+* feat(docker): add assets volume and ASSETS_ROOT env to docker-compose.yml ([cc412ea](https://github.com/JoRouquette/scribe-ektaron/commit/cc412ea))
+* feat(logging): add structured logger and propagate context across backend ([a3a114a](https://github.com/JoRouquette/scribe-ektaron/commit/a3a114a))
+* feat(viewer): improve markdown layout and styling, add OnPush change detection ([2cf24a4](https://github.com/JoRouquette/scribe-ektaron/commit/2cf24a4))
+
 ## <small>1.1.5 (2025-11-13)</small>
 
 * test: sementic commit message ([b3b460c](https://github.com/JoRouquette/scribe-ektaron/commit/b3b460c))
