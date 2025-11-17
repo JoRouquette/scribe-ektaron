@@ -122,7 +122,7 @@ export class PublishNotesUseCase {
     segments.push(note.slug);
 
     // On garde un trailing slash, conforme à ton contrat
-    return '/' + segments.join('/') + '/';
+    return '/' + segments.join('/');
   }
 
   private buildHtmlPage(note: Note, bodyHtml: string): string {
