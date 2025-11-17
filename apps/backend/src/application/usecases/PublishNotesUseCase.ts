@@ -53,7 +53,10 @@ export class PublishNotesUseCase {
     if (succeeded.length > 0) {
       logger?.info(`Updating site manifest and indexes for ${succeeded.length} published notes`);
       const pages: ManifestPage[] = succeeded.map((n) => {
-        const route = this.buildPageRoute(n, logger);
+        const route = this.buildPageRoute(
+          n,
+          logger?.child({ method: 'buildPageRoute', noteId: n.id, slug: n.slug })
+        );
 
         return {
           id: n.id,
@@ -95,30 +98,30 @@ export class PublishNotesUseCase {
    * -> "/codex/puissances/divinites/thormak/"
    */
   private buildPageRoute(note: Note, logger?: LoggerPort): string {
-    const rawRoute = (note.route ?? '').trim();
-    const rawRelativePath = (note.relativePath ?? '').trim();
+    const routeSegment = (note.route ?? '').trim().replace(/^\/+/, '').replace(/\/+$/, '');
+    logger?.debug('Building page route', {
+      routeSegment,
+      relativePath: note.relativePath,
+      slug: note.slug,
+    });
 
-    // Nettoyage de la route : on garde le leading slash côté résultat, pas dans les segments
-    const routeSegment = rawRoute
-      .replace(/^\/+/, '') // vire les slashes en début
-      .replace(/\/+$/, ''); // vire les slashes en fin
-
-    // Nettoyage du relativePath : jamais de slash en début/fin
-    const relativeSegment = rawRelativePath.replace(/^\/+/, '').replace(/\/+$/, '');
+    const relativeSegment = (note.relativePath ?? '')
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/\/+$/, '');
+    logger?.debug('Relative segment for route', { relativeSegment });
 
     const segments: string[] = [];
-
-    if (routeSegment.length > 0) {
+    if (routeSegment) {
       segments.push(routeSegment);
     }
 
-    if (relativeSegment.length > 0) {
-      segments.push(...relativeSegment.split('/').filter((s) => s.length > 0));
+    if (relativeSegment) {
+      segments.push(...relativeSegment.split('/').filter(Boolean));
     }
-
     segments.push(note.slug);
+    logger?.debug('Final segments for route', { segments });
 
-    // On garde un trailing slash, conforme à ton contrat
     return '/' + segments.join('/');
   }
 

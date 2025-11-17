@@ -1,15 +1,15 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import type { ContentStoragePort } from '../../application/ports/ContentStoragePort';
 import { LoggerPort } from '../../application/ports/LoggerPort';
+import type { StoragePort } from '../../application/ports/StoragePort';
 
-export class FileSystemContentStorage implements ContentStoragePort {
+export class FileSystemContentStorage implements StoragePort {
   constructor(
     private readonly rootDir: string,
     private readonly logger?: LoggerPort
   ) {}
 
-  async save(params: { route: string; html: string; slug?: string }): Promise<void> {
+  async save(params: { route: string; content: string; slug?: string }): Promise<void> {
     const normalizedRoute = this.normalizeRoute(params.route);
 
     const segs = normalizedRoute.replace(/^\/+/, '').split('/').filter(Boolean);
@@ -18,7 +18,7 @@ export class FileSystemContentStorage implements ContentStoragePort {
       if (segs.length === 0) {
         const filePath = path.join(this.rootDir, 'index.html');
         await fs.mkdir(this.rootDir, { recursive: true });
-        await fs.writeFile(filePath, params.html, 'utf8');
+        await fs.writeFile(filePath, params.content, 'utf8');
         this.logger?.info('Saved HTML to root index.html', { filePath, route: params.route });
         return;
       }
@@ -31,7 +31,7 @@ export class FileSystemContentStorage implements ContentStoragePort {
 
       const dir = path.dirname(filePath);
       await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(filePath, params.html, 'utf8');
+      await fs.writeFile(filePath, params.content, 'utf8');
       this.logger?.info('Saved HTML to file', { filePath, route: params.route, slug: params.slug });
     } catch (error) {
       this.logger?.error('Failed to save HTML file', {

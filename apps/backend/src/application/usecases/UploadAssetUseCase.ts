@@ -1,3 +1,4 @@
+import { relative } from 'node:path';
 import { LoggerPort } from '../ports/LoggerPort';
 import { StoragePort } from '../ports/StoragePort';
 
@@ -18,7 +19,7 @@ export class UploadAssetUseCase {
   async execute(command: UploadAssetCommand): Promise<void> {
     await this.assetStorage.save(
       {
-        route: command.relativeAssetPath,
+        relativeAssetPath: command.relativeAssetPath,
         content: command.content,
       },
       this.logger?.child({
