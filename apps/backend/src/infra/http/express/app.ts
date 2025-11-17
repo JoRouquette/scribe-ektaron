@@ -13,11 +13,11 @@ import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
 import { PublishNotesUseCase } from '../../../application/usecases/PublishNotesUseCase';
 import { UploadAssetUseCase } from '../../../application/usecases/UploadAssetUseCase';
 import { EnvConfig } from '../../config/EnvConfig';
-import { ConsoleLogger } from '../../logging/ConsoleLogger';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
+import { LoggerPort } from '../../../application/ports/LoggerPort';
 
-export function createApp() {
+export function createApp(rootLogger?: LoggerPort) {
   const app = express();
 
   app.use(express.json({ limit: '10mb' })); // à adapter si nécessaire
@@ -29,49 +29,55 @@ export function createApp() {
   app.use('/assets', express.static(EnvConfig.assetsRoot()));
   app.use('/content', express.static(EnvConfig.contentRoot()));
 
-  // Construct use cases & adapters
-  const rootLogger = new ConsoleLogger({ level: EnvConfig.loggerLevel() });
+  // Log app startup and config
+  rootLogger?.info('Initializing Express app', {
+    assetsRoot: EnvConfig.assetsRoot(),
+    contentRoot: EnvConfig.contentRoot(),
+    uiRoot: EnvConfig.uiRoot(),
+    loggerLevel: EnvConfig.loggerLevel(),
+    allowedOrigins: EnvConfig.allowedOrigins(),
+  });
 
   const markdownRenderer = new MarkdownItRenderer();
   const contentStorage = new FileSystemContentStorage(
     EnvConfig.contentRoot(),
-    rootLogger.child({ adapter: 'FileSystemContentStorage' })
+    rootLogger?.child({ adapter: 'FileSystemContentStorage' })
   );
   const siteIndex = new FileSystemSiteIndex(
     EnvConfig.contentRoot(),
-    rootLogger.child({ adapter: 'FileSystemSiteIndex' })
+    rootLogger?.child({ adapter: 'FileSystemSiteIndex' })
   );
   const assetStorage = new FileSystemAssetStorage(
     EnvConfig.assetsRoot(),
-    rootLogger.child({ adapter: 'FileSystemAssetStorage' })
+    rootLogger?.child({ adapter: 'FileSystemAssetStorage' })
   );
 
   const publishNotesUseCase = new PublishNotesUseCase(
     markdownRenderer,
     contentStorage,
     siteIndex,
-    rootLogger.child({ useCase: 'PublishNotesUseCase' })
+    rootLogger?.child({ useCase: 'PublishNotesUseCase' })
   );
   const uploadAssetUseCase = new UploadAssetUseCase(
     assetStorage,
-    rootLogger.child({ useCase: 'UploadAssetUseCase' })
+    rootLogger?.child({ useCase: 'UploadAssetUseCase' })
   );
 
   // API routes (protégées par API key)
   const apiRouter = express.Router();
   apiRouter.use(apiKeyMiddleware);
 
-  apiRouter.use(createPingController(rootLogger.child({ controller: 'pingController' })));
+  apiRouter.use(createPingController(rootLogger?.child({ controller: 'pingController' })));
   apiRouter.use(
     createUploadController(
       publishNotesUseCase,
-      rootLogger.child({ controller: 'uploadController' })
+      rootLogger?.child({ controller: 'uploadController' })
     )
   );
   apiRouter.use(
     createAssetsUploadController(
       uploadAssetUseCase,
-      rootLogger.child({ controller: 'assetsUploadController' })
+      rootLogger?.child({ controller: 'assetsUploadController' })
     )
   );
 
@@ -80,9 +86,25 @@ export function createApp() {
   const ANGULAR_DIST = EnvConfig.uiRoot();
   app.use(express.static(ANGULAR_DIST));
 
+  // Log each incoming request
+  app.use((req, res, next) => {
+    rootLogger?.info('Incoming request', {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+    });
+    next();
+  });
+
   app.get('*', (req, res) => {
+    rootLogger?.info('Serving Angular index.html for unmatched route', {
+      url: req.originalUrl,
+    });
     res.sendFile(path.join(ANGULAR_DIST, 'index.html'));
   });
 
-  return { app, EnvConfig, logger: rootLogger };
+  // Log app ready
+  rootLogger?.info('Express app initialized');
+
+  return { app, logger: rootLogger };
 }

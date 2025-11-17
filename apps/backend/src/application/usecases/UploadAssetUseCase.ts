@@ -12,7 +12,7 @@ export interface UploadAssetCommand {
 export class UploadAssetUseCase {
   constructor(
     private readonly assetStorage: StoragePort,
-    private readonly logger: LoggerPort
+    private readonly logger?: LoggerPort
   ) {}
 
   async execute(command: UploadAssetCommand): Promise<void> {
@@ -21,7 +21,7 @@ export class UploadAssetUseCase {
         route: command.relativeAssetPath,
         content: command.content,
       },
-      this.logger.child({
+      this.logger?.child({
         useCase: 'UploadAssetUseCase',
         noteId: command.noteId,
         noteRoute: command.noteRoute,
