@@ -16,6 +16,7 @@ import { EnvConfig } from '../../config/EnvConfig';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
 import { LoggerPort } from '../../../application/ports/LoggerPort';
+import { createHealthCheckController } from './controllers/healthCheckController';
 
 export function createApp(rootLogger?: LoggerPort) {
   const app = express();
@@ -95,6 +96,8 @@ export function createApp(rootLogger?: LoggerPort) {
     });
     next();
   });
+
+  app.use(createHealthCheckController(rootLogger?.child({ controller: 'healthCheckController' })));
 
   app.get('*', (req, res) => {
     rootLogger?.info('Serving Angular index.html for unmatched route', {
