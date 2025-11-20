@@ -65,7 +65,7 @@ export function createApp(rootLogger?: LoggerPort) {
 
   app.use('/api', apiRouter);
 
-  const ANGULAR_DIST = EnvConfig.uiRoot();
+  const ANGULAR_DIST = path.resolve(EnvConfig.uiRoot());
   app.use(express.static(ANGULAR_DIST));
 
   // Log each incoming request
@@ -92,7 +92,9 @@ export function createApp(rootLogger?: LoggerPort) {
     rootLogger?.info('Serving Angular index.html for unmatched route', {
       url: req.originalUrl,
     });
-    res.sendFile(path.join(ANGULAR_DIST, 'index.html'));
+
+    const indexPath = path.join(ANGULAR_DIST, 'index.html'); // maintenant absolu
+    res.sendFile(indexPath);
   });
 
   // Log app ready

@@ -13,7 +13,7 @@ export class EnvConfig {
   }
 
   static apiKey(): string {
-    return this.norm(process.env.API_KEY);
+    return this.norm(process.env.API_KEY) || 'devkeylocal';
   }
 
   static uiRoot(): string {
@@ -29,7 +29,7 @@ export class EnvConfig {
   }
 
   static port(): number {
-    const p = Number(this.norm(process.env.PORT));
+    const p = Number(this.norm(process.env.PORT ?? '3000'));
     return Number.isFinite(p) ? p : 3000;
   }
 

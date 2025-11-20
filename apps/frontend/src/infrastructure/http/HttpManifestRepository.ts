@@ -14,15 +14,14 @@ export class HttpManifestRepository implements ManifestRepository {
 
   constructor(private http: HttpClient) {
     console.log('HttpManifestRepository initialized');
-    this.cache$ = this.http
-      .get<ManifestDTO>(StringUtils.buildRoute(CONTENT_ROOT, '_manifest.json'), {
-        responseType: 'json',
-      })
-      .pipe(shareReplay(1));
+    const url = StringUtils.buildRoute(CONTENT_ROOT, '_manifest.json');
+    console.log('Fetching manifest from URL:', url);
+
+    this.cache$ = this.http.get<ManifestDTO>(url).pipe(shareReplay(1));
   }
 
   async load(): Promise<Manifest> {
-    const dto = await firstValueFrom(this.cache$);
+    const dto: ManifestDTO = await firstValueFrom(this.cache$);
     console.log('Manifest loaded:', dto);
     return toDomain(dto);
   }
