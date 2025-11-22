@@ -1,18 +1,24 @@
-import { ManifestPage } from '../../application/ports/SiteIndexPort';
+import { ManifestPage } from '../../application/ports/NotesIndexPort';
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 function escapeHtml(s: string) {
-  return s.replace(
+  let escaped = s.replace(
     /[&<>"']/g,
     (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]!
   );
+
+  return capitalize(escaped);
 }
 
-export function renderRootIndex(dirs: { name: string; href: string; count: number }[]) {
+export function renderRootIndex(dirs: { name: string; link: string; count: number }[]) {
   const items = dirs
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
       (d) =>
-        `<li><a href="${d.href}/index.html">${escapeHtml(d.name)}</a> <small>(${d.count})</small></li>`
+        `<li><a [routerLink]="${d.link}/index.html">${escapeHtml(d.name)}</a> <small>(${d.count})</small></li>`
     )
     .join('');
 
@@ -26,22 +32,22 @@ export function renderRootIndex(dirs: { name: string; href: string; count: numbe
 export function renderFolderIndex(
   folderPath: string,
   pages: ManifestPage[],
-  subfolders: { name: string; href: string; count: number }[]
+  subfolders: { name: string; link: string; count: number }[]
 ) {
   const folderName = folderPath === '/' ? '/' : folderPath.split('/').filter(Boolean).pop()!;
-  const folderTitle = folderName || 'Home';
+  const folderTitle = capitalize(folderName) || 'Home';
 
   const subfoldList = subfolders
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
       (d) =>
-        `<li><a href="${d.href}/index.html">${escapeHtml(d.name)}</a> <small>(${d.count})</small></li>`
+        `<li><a [routerLink]="${d.link}/index.html">${escapeHtml(d.name)}</a> <small>(${d.count})</small></li>`
     )
     .join('');
 
   const pageList = pages
     .sort((a, b) => a.title.localeCompare(b.title))
-    .map((p) => `<li><a href="${p.route}.html">${escapeHtml(p.title)}</a></li>`)
+    .map((p) => `<li><a [routerLink]="${p.route}.html">${escapeHtml(p.title)}</a></li>`)
     .join('');
 
   return `<div class="markdown-body">

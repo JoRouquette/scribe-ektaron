@@ -13,7 +13,7 @@ export class EnvConfig {
   }
 
   static apiKey(): string {
-    return this.norm(process.env.API_KEY);
+    return this.norm(process.env.API_KEY) || 'devkeylocal';
   }
 
   static uiRoot(): string {
@@ -29,7 +29,7 @@ export class EnvConfig {
   }
 
   static port(): number {
-    const p = Number(this.norm(process.env.PORT));
+    const p = Number(this.norm(process.env.PORT ?? '3000'));
     return Number.isFinite(p) ? p : 3000;
   }
 
@@ -43,5 +43,21 @@ export class EnvConfig {
       return level;
     }
     return 'info';
+  }
+
+  static siteName(): string {
+    return this.norm(process.env.SITE_NAME) || "Scribe d'Ektaron";
+  }
+
+  static author(): string {
+    return this.norm(process.env.AUTHOR) || 'Author Name';
+  }
+
+  static repoUrl(): string {
+    return this.norm(process.env.REPO_URL) || '';
+  }
+
+  static reportIssuesUrl(): string {
+    return this.norm(process.env.REPORT_ISSUES_URL) || '';
   }
 }

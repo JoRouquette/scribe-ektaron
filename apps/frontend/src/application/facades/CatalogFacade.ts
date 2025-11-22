@@ -1,8 +1,8 @@
 import { computed, Inject, Injectable, signal } from '@angular/core';
 import { Manifest } from '../../domain/models/Manifest';
-import { HtmlGateway } from '../../domain/ports/HtmlGateway';
+import { ContentRepository } from '../../domain/ports/ContentRepository';
 import { ManifestRepository } from '../../domain/ports/ManifestRepository';
-import { HTML_GATEWAY, MANIFEST_REPOSITORY } from '../../domain/ports/tokens';
+import { CONTENT_REPOSITORY, MANIFEST_REPOSITORY } from '../../domain/ports/tokens';
 import { FindPageUseCase } from '../usecases/FindPage.usecase';
 import { LoadManifestUseCase } from '../usecases/LoadManifest.usecase';
 import { SearchPagesUseCase } from '../usecases/SearchPages.usecase';
@@ -13,19 +13,28 @@ export class CatalogFacade {
   private readonly searchUc: SearchPagesUseCase;
   private readonly findUc: FindPageUseCase;
 
-  constructor(
-    @Inject(MANIFEST_REPOSITORY) private readonly manifestRepo: ManifestRepository,
-    @Inject(HTML_GATEWAY) private readonly html: HtmlGateway
-  ) {
-    this.loadManifest = new LoadManifestUseCase(this.manifestRepo);
-    this.searchUc = new SearchPagesUseCase();
-    this.findUc = new FindPageUseCase();
-  }
-
-  manifest = signal<Manifest | null>(null);
+  manifest = signal<Manifest>({ pages: [] });
   query = signal('');
   loading = signal(false);
   error = signal<string | null>(null);
+
+  constructor(
+    @Inject(MANIFEST_REPOSITORY) private readonly manifestRepository: ManifestRepository,
+    @Inject(CONTENT_REPOSITORY) private readonly contentRepository: ContentRepository
+  ) {
+    console.log('CatalogFacade initialized with manifestRepo and contentRepo');
+
+    this.loadManifest = new LoadManifestUseCase(this.manifestRepository);
+    this.loadManifest.exec().then((m) => {
+      this.manifest.set(m);
+      console.log('Initial manifest loaded in CatalogFacade:', m);
+    });
+
+    this.searchUc = new SearchPagesUseCase();
+    this.findUc = new FindPageUseCase();
+
+    console.log('LoadManifestUseCase, SearchPagesUseCase, and FindPageUseCase initialized');
+  }
 
   results = computed(() => {
     const m = this.manifest();
@@ -34,7 +43,10 @@ export class CatalogFacade {
   });
 
   async ensureManifest(): Promise<void> {
-    if (this.manifest()) return;
+    if (this.manifest()) {
+      console.log('Manifest already loaded, skipping load');
+      return;
+    }
     this.loading.set(true);
     this.error.set(null);
     try {
@@ -55,7 +67,7 @@ export class CatalogFacade {
     if (!m) return null;
     const page = this.findUc.exec(m, slugOrRoute);
     if (!page) return null;
-    const raw = await this.html.fetch(page.filePath);
+    const raw = await this.contentRepository.fetch(page.route ?? page.slug);
     return { title: page.title, html: raw };
   }
 }

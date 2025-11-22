@@ -4,14 +4,14 @@ import { resolveWithinRoot } from './pathUtils';
 import { AssetStoragePort } from '../../application/ports/AssetStoragePort';
 import { LoggerPort } from '../../application/ports/LoggerPort';
 
-export class FileSystemAssetStorage implements AssetStoragePort {
+export class AssetsFileSystemStorage implements AssetStoragePort {
   constructor(
     private readonly assetsRoot: string,
     private readonly logger?: LoggerPort
   ) {}
 
-  async save(params: { relativeAssetPath: string; content: Buffer }): Promise<void> {
-    const { relativeAssetPath, content } = params;
+  async save(params: { filename: string; content: Buffer }): Promise<void> {
+    const { filename: relativeAssetPath, content } = params;
 
     const normalizedRelative = relativeAssetPath.replace(/^[/\\]+/, '');
     const fullPath = resolveWithinRoot(this.assetsRoot, normalizedRelative);
