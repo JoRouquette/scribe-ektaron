@@ -1,36 +1,48 @@
 import { CommandHandler } from '../../common/CommandHandler';
 import { IdGeneratorPort } from '../../ports/IdGeneratorPort';
 import { LoggerPort } from '../../ports/LoggerPort';
-import { CreateSessionCommand, CreateSessionResult } from '../commands/CreateSessionCommand';
+import { CreateSessionCommand } from '../commands/CreateSessionCommand';
+import { CreateSessionResult } from '../commands/CreateSessionResult';
 import { SessionRepository } from '../ports/SessionRepository';
+import { Session } from '../../../domain/entities/Session';
 
 export class CreateSessionHandler
   implements CommandHandler<CreateSessionCommand, CreateSessionResult>
 {
+  private readonly logger?: LoggerPort;
+
   constructor(
     private readonly idGenerator: IdGeneratorPort,
     private readonly sessionRepository: SessionRepository,
-    private readonly logger?: LoggerPort
+    logger?: LoggerPort
   ) {
-    logger = logger?.child({ handler: 'CreateSessionHandler' });
+    this.logger = logger?.child({ handler: 'CreateSessionHandler' });
   }
 
   async handle(command: CreateSessionCommand): Promise<CreateSessionResult> {
     const logger = this.logger?.child({ method: 'handle' });
+
     const sessionId = this.idGenerator.generateId();
+    const now = new Date();
 
-    logger?.info('Creating new session', { sessionId });
+    const session: Session = {
+      id: sessionId,
+      notesPlanned: command.notesPlanned,
+      assetsPlanned: command.assetsPlanned,
+      notesProcessed: 0,
+      assetsProcessed: 0,
+      status: 'pending',
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    
+    await this.sessionRepository.create(session);
+
+    logger?.info('Session created', { sessionId });
 
     return {
-      sessionId: sessionId,
+      sessionId,
       success: true,
-      notesUploadUrl: `https://example.com/sessions/${sessionId}/upload-notes`,
-      assetsUploadUrl: `https://example.com/sessions/${sessionId}/upload-assets`,
-      finishSessionUrl: `https://example.com/sessions/${sessionId}/finish`,
-      abortSessionUrl: `https://example.com/sessions/${sessionId}/abort`,
-      maxBytesPerRequest: command.batchConfig.maxBytesPerRequest,
     };
   }
 }

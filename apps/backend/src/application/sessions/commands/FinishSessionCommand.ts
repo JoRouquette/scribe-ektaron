@@ -3,9 +3,3 @@ export interface FinishSessionCommand {
   notesProcessed: number;
   assetsProcessed: number;
 }
-
-export interface FinishSessionResult {
-  sessionId: string;
-  success: boolean;
-  
-}

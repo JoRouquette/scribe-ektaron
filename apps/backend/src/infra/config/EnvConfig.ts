@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 export class EnvConfig {
   private static norm(s: string | undefined): string {
     return (s ?? '').replace(/^\uFEFF/, '').trim();
@@ -17,15 +19,15 @@ export class EnvConfig {
   }
 
   static uiRoot(): string {
-    return this.norm(process.env.UI_ROOT) || './tmp/ui';
+    return path.resolve(this.norm(process.env.UI_ROOT) || './tmp/ui');
   }
 
   static assetsRoot(): string {
-    return this.norm(process.env.ASSETS_ROOT) || './tmp/assets';
+    return path.resolve(this.norm(process.env.ASSETS_ROOT) || './tmp/assets');
   }
 
   static contentRoot(): string {
-    return this.norm(process.env.CONTENT_ROOT) || './tmp/site-content';
+    return path.resolve(this.norm(process.env.CONTENT_ROOT) || './tmp/site-content');
   }
 
   static port(): number {

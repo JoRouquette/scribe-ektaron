@@ -16,10 +16,12 @@ import { createHealthCheckController } from './controllers/healthCheckController
 import { createPingController } from './controllers/pingController';
 import { createSessionController } from './controllers/sessionController';
 
+export const BYTES_LIMIT = '10mb';
+
 export function createApp(rootLogger?: LoggerPort) {
   const app = express();
 
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: BYTES_LIMIT }));
 
   app.use(createCorsMiddleware(EnvConfig.allowedOrigins()));
   const apiKeyMiddleware = createApiKeyAuthMiddleware(EnvConfig.apiKey());

@@ -5,13 +5,3 @@ export interface CreateSessionCommand {
     maxBytesPerRequest: number;
   };
 }
-
-export interface CreateSessionResult {
-  sessionId: string;
-  success: boolean;
-  notesUploadUrl: string;
-  assetsUploadUrl: string;
-  finishSessionUrl: string;
-  abortSessionUrl: string;
-  maxBytesPerRequest: number;
-}
