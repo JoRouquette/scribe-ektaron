@@ -1,6 +1,10 @@
 import { promises as fs } from 'fs';
 import * as path from 'path';
-import { Manifest, ManifestPage, NotesIndexPort } from '../../application/ports/NotesIndexPort';
+import {
+  Manifest,
+  ManifestPage,
+  NotesIndexPort,
+} from '../../application/publishing/ports/NotesIndexPort';
 import { renderFolderIndex, renderRootIndex } from './SiteIndexTemplates';
 import { LoggerPort } from '../../application/ports/LoggerPort';
 import { title } from 'process';

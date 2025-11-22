@@ -10,13 +10,12 @@ import { NotesFileSystemStorage } from '../../filesystem/NotesFileSystemStorage'
 import { NotesFileSystem } from '../../filesystem/NotesFileSystem';
 import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
 
-import { UploadNotesUseCase } from '../../../application/usecases/UploadNotesUseCase';
-import { UploadAssetUseCase } from '../../../application/usecases/UploadAssetUseCase';
 import { EnvConfig } from '../../config/EnvConfig';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
 import { LoggerPort } from '../../../application/ports/LoggerPort';
 import { createHealthCheckController } from './controllers/healthCheckController';
+import { createSessionController } from './controllers/createSessionController';
 
 export function createApp(rootLogger?: LoggerPort) {
   const app = express();
@@ -43,15 +42,8 @@ export function createApp(rootLogger?: LoggerPort) {
   const noteStorage = new NotesFileSystemStorage(EnvConfig.contentRoot(), rootLogger);
   const noteFileSystem = new NotesFileSystem(EnvConfig.contentRoot(), rootLogger);
 
-  const publishNotesUseCase = new UploadNotesUseCase(
-    markdownRenderer,
-    noteStorage,
-    noteFileSystem,
-    rootLogger
-  );
-
   const assetStorage = new AssetsFileSystemStorage(EnvConfig.assetsRoot(), rootLogger);
-  const uploadAssetUseCase = new UploadAssetUseCase(assetStorage, rootLogger);
+  // const uploadAssetUseCase = new UploadAssetUseCase(assetStorage, rootLogger);
 
   // API routes (protégées par API key)
   const apiRouter = express.Router();
@@ -59,9 +51,27 @@ export function createApp(rootLogger?: LoggerPort) {
 
   apiRouter.use(createPingController(rootLogger));
 
-  apiRouter.use(createNoteUploadController(publishNotesUseCase, rootLogger));
+  // const publishNotesUseCase = new UploadNotesUseCase(
+  //   markdownRenderer,
+  //   noteStorage,
+  //   noteFileSystem,
+  //   rootLogger
+  // );
 
-  apiRouter.use(createAssetsUploadController(uploadAssetUseCase, rootLogger));
+  // apiRouter.use(createNoteUploadController(publishNotesUseCase, rootLogger));
+
+  // apiRouter.use(createAssetsUploadController(uploadAssetUseCase, rootLogger));
+
+  // const uploadNotesUseCase = new UploadNotesUseCase(
+  //   markdownRenderer,
+  //   noteStorage,
+  //   noteFileSystem,
+  //   rootLogger
+  // );
+
+  // const uploadAssetsUseCase = new UploadAssetUseCase(assetStorage, rootLogger);
+
+  // apiRouter.use(createSessionController(uploadNotesUseCase, uploadAssetsUseCase, rootLogger));
 
   app.use('/api', apiRouter);
 

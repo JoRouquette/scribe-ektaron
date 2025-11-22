@@ -1,15 +1,15 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { LoggerPort } from '../../application/ports/LoggerPort';
-import type { StoragePort } from '../../application/ports/StoragePort';
+import { ContentStoragePort } from '../../application/publishing/ports/ContentStoragePort';
 
-export class NotesFileSystemStorage implements StoragePort {
+export class NotesFileSystemStorage implements ContentStoragePort {
   constructor(
     private readonly rootDir: string,
     private readonly logger?: LoggerPort
   ) {}
 
-  async save(params: { route: string; content: string; slug: string }): Promise<void> {
+  async save(params: { route: string; content: string; slug?: string }): Promise<void> {
     const normalizedRoute = this.normalizeRoute(params.route);
 
     const segs = normalizedRoute.replace(/^\/+/, '').split('/').filter(Boolean);

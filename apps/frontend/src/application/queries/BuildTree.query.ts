@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Manifest } from '../../domain/models/Manifest';
+import { Query } from './Query';
 
 export type NodeKind = 'folder' | 'file';
 
@@ -14,8 +15,8 @@ export interface TreeNode {
 }
 
 @Injectable({ providedIn: 'root' })
-export class BuildTreeUseCase {
-  exec(m: Manifest): TreeNode {
+export class BuildTreeQuery implements Query<Manifest, TreeNode> {
+  execute(m: Manifest): Promise<TreeNode> {
     const root: TreeNode = this.folder('', '', '');
 
     for (const p of m.pages) {
@@ -23,7 +24,8 @@ export class BuildTreeUseCase {
     }
 
     this.sortRec(root);
-    return root;
+
+    return Promise.resolve(root);
   }
 
   private processPage(p: Manifest['pages'][number], root: TreeNode): void {

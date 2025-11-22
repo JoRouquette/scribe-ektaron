@@ -1,22 +1,22 @@
-import type { Note } from '../../domain/entities/Note';
-import { LoggerPort } from '../ports/LoggerPort';
-import type { MarkdownRendererPort } from '../ports/MarkdownRendererPort';
+import type { Note } from '../../../domain/entities/Note';
+import { ContentStoragePort } from '../ports/ContentStoragePort';
+import { LoggerPort } from '../../ports/LoggerPort';
+import type { MarkdownRendererPort } from '../../ports/MarkdownRendererPort';
 import type { Manifest, ManifestPage, NotesIndexPort } from '../ports/NotesIndexPort';
-import type { StoragePort } from '../ports/StoragePort';
 
 export interface PublishNotesOutput {
   published: number;
   errors: { noteId: string; message: string }[];
 }
 
-export class UploadNotesUseCase {
+export class UploadNotesHandler {
   constructor(
     private readonly markdownRenderer: MarkdownRendererPort,
-    private readonly contentStorage: StoragePort,
-    private readonly siteIndex: NotesIndexPort,
+    private readonly contentStorage: ContentStoragePort,
+    private readonly notesIndex: NotesIndexPort,
     private readonly logger?: LoggerPort
   ) {
-    logger = logger?.child({ module: 'PublishNotesUseCase' });
+    logger = logger?.child({ handler: 'UploadNotesHandler' });
   }
 
   async execute(notes: Note[]): Promise<PublishNotesOutput> {
@@ -70,8 +70,8 @@ export class UploadNotesUseCase {
       logger?.debug('Manifest pages ', { manifestPages: pages });
 
       const manifest: Manifest = { pages };
-      await this.siteIndex.save(manifest);
-      await this.siteIndex.rebuildIndex(manifest);
+      await this.notesIndex.save(manifest);
+      await this.notesIndex.rebuildIndex(manifest);
       logger?.info('Site manifest and indexes updated');
     }
 

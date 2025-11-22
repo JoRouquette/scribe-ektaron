@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { LoggerPort } from '../../../../application/ports/LoggerPort';
-import { UploadAssetUseCase } from '../../../../application/usecases/UploadAssetUseCase';
 import { ApiAssetsBodyDto } from '../dto/UploadAssetsDto';
 import { Asset } from '../../../../domain/entities/Asset';
+import { UploadAssetsHandler } from '../../../../application/publishing/handlers/UploadAssetsHandler';
 
 export function createAssetsUploadController(
-  uploadAssetUseCase: UploadAssetUseCase,
+  uploadAssetHandler: UploadAssetsHandler,
   logger?: LoggerPort
 ): Router {
   const router = Router();
@@ -21,7 +21,7 @@ export function createAssetsUploadController(
         return res.status(400).json({ status: 'invalid_payload' });
       }
 
-      const { assets } : { assets: Asset[] } = parsed.data;
+      const { assets }: { assets: Asset[] } = parsed.data;
       log?.info?.('Uploading assets batch', { count: assets.length });
 
       for (const dto of assets) {
@@ -36,7 +36,7 @@ export function createAssetsUploadController(
 
         const asset: Asset = dto; // types compatibles
 
-        await uploadAssetUseCase.execute(asset, buffer);
+        await uploadAssetHandler.execute();
       }
 
       log?.info?.('Assets uploaded successfully', { count: assets.length });
