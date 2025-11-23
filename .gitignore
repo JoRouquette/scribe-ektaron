@@ -1,8 +1,9 @@
 /node_modules
 /dist
 /.idea
-/.vscode
 .env
+.env.**
+!.env.**example
 /tmp
 
 # Ignore node_modules, dist, and .env in all apps
@@ -10,6 +11,29 @@
 /apps/*/dist
 /apps/*/.env
 /apps/*/tmp
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
 
 # Ignore build artifacts in the ui app
 **/content/**/*
+**/assets/**/*
+**/build/**/*
+**.angular**
+**.next**
+**.turbo**
+**.cache**
+**.output**
+
+# Ignore logs
+logs
+*.log
+npm-debug.log*
+
+
+
+.nx/cache
+.nx/workspace-data
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+.angular

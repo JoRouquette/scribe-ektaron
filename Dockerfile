@@ -1,87 +1,104 @@
 # syntax=docker/dockerfile:1.6
 
-FROM node:20.19.0-alpine3.20 AS frontend-builder
-WORKDIR /app/frontend
+################################
+#   STAGE 1 : NX BUILDER       #
+################################
+FROM node:20-alpine AS builder
 
-# Dépendances front
-COPY apps/frontend/package.json apps/frontend/package-lock.json ./
+WORKDIR /workspace
+
+# Fichiers de base du monorepo Nx
+COPY package.json package-lock.json nx.json tsconfig.base.json ./
+
+# Sources des apps et libs Nx
+COPY apps ./apps
+COPY libs ./libs
+# (si tu as besoin d'autres fichiers globaux pour le build, tu peux les ajouter ici)
+
+# Install des dépendances (avec devDependencies pour builder Angular/Node)
+# Ici on laisse les scripts s'exécuter (prepare, postinstall...) pour un environnement de build complet.
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund
+    npm install --no-audit --no-fund
 
-# Sources front
-COPY apps/frontend/ ./
-# Build Angular (doit produire dist/<project>/browser)
+# Build global via ton script Nx déjà configuré
+# => construit core-domain, core-application, node, site
 RUN npm run build
 
-FROM node:20.19.0-alpine3.20 AS backend-builder
-WORKDIR /app/backend
 
-# Dépendances back
-COPY apps/backend/package.json apps/backend/package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund
+################################
+#   STAGE 2 : RUNTIME          #
+################################
+FROM node:20-alpine AS runtime
 
-# Sources back
-COPY apps/backend/ ./
-# Transpile TypeScript -> dist
-RUN npm run build
-
-FROM node:20.19.0-alpine3.20 AS runtime
-
+# Valeurs par défaut – surchargées par docker-compose / .env.*
 ENV NODE_ENV=production \
     PORT=3000 \
-    LOGGER_LEVEL=debug \
     CONTENT_ROOT=/content \
     ASSETS_ROOT=/assets \
     UI_ROOT=/ui \
-    API_PREFIX=/api \
-    AUTHOR_NAME="Jonathan Rouquette" \
-    REPO_URL="https://github.com/JoRouquette/scribe-ektaron" 
+    NODE_OPTIONS=--enable-source-maps
 
-# Paquets de base (wget pour healthcheck)
-RUN apk --no-cache upgrade && apk add --no-cache wget
+# Utilitaires pour le healthcheck (wget)
+RUN apk add --no-cache wget
 
-# ---- Backend runtime deps ----
-WORKDIR /app/apps/backend
-COPY --from=backend-builder /app/backend/package.json ./package.json
-COPY --from=backend-builder /app/backend/package-lock.json ./package-lock.json
+WORKDIR /app
+
+# User non-root
+RUN addgroup -S nodegrp \
+    && adduser -S -D -h /app -G nodegrp nodeusr
+
+################################
+#   INSTALL DEPENDANCES RUNTIME
+################################
+# On repart du package.json racine du monorepo
+COPY package.json package-lock.json ./
+
+# Ici on NE VEUT PAS :
+# - les devDependencies
+# - les optionalDependencies
+# - NI les scripts npm (prepare, postinstall, etc. → husky, etc.)
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --omit=optional --no-audit --no-fund \
+    npm install --omit=dev --omit=optional --no-audit --no-fund --ignore-scripts \
     && npm cache clean --force
 
-# Code back
-COPY --from=backend-builder /app/backend/dist ./dist
+################################
+#   COPIE DES BUILDS NX        #
+################################
+# On copie tout le dossier dist généré par Nx (apps + libs)
+COPY --from=builder /workspace/dist ./dist
 
-# ---- Frontend static ----
-WORKDIR /app
-COPY --from=frontend-builder /app/frontend/dist /app/ui-src
-
-# Copie robuste du bon dossier "browser" (Angular 16+)
+################################
+#   FRONTEND STATIC (Angular)  #
+################################
+# On cherche le dossier "browser" d'Angular dans dist/apps/site
 RUN set -eux; \
     mkdir -p "${UI_ROOT}"; \
-    BDIR="$(find /app/ui-src -type d -name browser -print -quit || true)"; \
+    BDIR="$(find /app/dist/apps/site -type d -name browser -print -quit || true)"; \
     if [ -n "$BDIR" ]; then \
     cp -r "$BDIR/"* "${UI_ROOT}/"; \
-    elif [ -f "/app/ui-src/index.html" ]; then \
-    cp -r /app/ui-src/* "${UI_ROOT}/"; \
+    elif [ -f "/app/dist/apps/site/index.html" ]; then \
+    # fallback si la structure diffère
+    cp -r /app/dist/apps/site/* "${UI_ROOT}/"; \
     else \
-    echo "ERROR: Angular build not found (dist/**/browser). Tree:"; \
-    ls -R /app/ui-src || true; \
+    echo "ERROR: Angular build not found (dist/apps/site/**/browser). Tree:"; \
+    ls -R /app/dist/apps/site || true; \
     exit 1; \
     fi; \
-    rm -rf /app/ui-src; \
-    [ -f "${UI_ROOT}/index.html" ]; \
-    addgroup -S nodegrp && adduser -S -D -h /app -G nodegrp nodeusr; \
-    mkdir -p "${CONTENT_ROOT}"; \
-    chown -R nodeusr:nodegrp /app "${CONTENT_ROOT}" "${UI_ROOT}"
+    [ -f "${UI_ROOT}/index.html" ] || (echo "ERROR: index.html not found in ${UI_ROOT}" && exit 1); \
+    ls -l "${UI_ROOT}" || true
+
+################################
+#   CONTENT / ASSETS           #
+################################
+RUN mkdir -p "${CONTENT_ROOT}" "${ASSETS_ROOT}" \
+    && chown -R nodeusr:nodegrp "${CONTENT_ROOT}" "${ASSETS_ROOT}" "${UI_ROOT}"
+
+# Optionnel : on vire les sourcemaps Angular en prod
+RUN find "${UI_ROOT}" -type f -name "*.map" -delete || true
 
 USER nodeusr
 
-# Nettoyage (cartes sourcemaps, caches)
-RUN find "${UI_ROOT}" -type f -name "*.map" -delete || true
-ENV NODE_OPTIONS=--enable-source-maps
-
 EXPOSE 3000
 
-# Démarrage backend (doit servir /ui en statique + fallback SPA)
-CMD ["node", "apps/backend/dist/main.js"]
+# Point d'entrée : build Nx de l'app Node
+CMD ["node", "dist/apps/node/main.js"]

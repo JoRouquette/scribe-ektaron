@@ -1,0 +1,39 @@
+<div class="grid">
+  <div class="Logo">
+    <app-logo></app-logo>
+  </div>
+
+  <div class="TopBar mat-elevation-z2">
+    <app-topbar
+      [siteName]="siteName()"
+      [crumbs]="crumbs()"
+      [isDark]="theme.isDark()"
+      (toggleTheme)="theme.toggle()"
+      (crumbClicked)="onCrumbClicked($event)"
+    >
+    </app-topbar>
+  </div>
+
+  <div class="vault-explorer">
+    <app-vault-explorer></app-vault-explorer>
+  </div>
+
+  <div class="main">
+    <router-outlet></router-outlet>
+
+    <footer class="footer">
+      <mat-icon>copyright</mat-icon> {{ currentYear }} {{ author() }}
+      @if(repo() !== '') { —
+      <a class="repo-link" [href]="repo()" target="_blank" rel="noopener">
+        <mat-icon aria-hidden="true">open_in_new</mat-icon>
+        Code
+      </a>
+      } @if (reportIssues() !== '') { —
+      <a class="repo-link" [href]="reportIssues()" target="_blank" rel="noopener">
+        <mat-icon aria-hidden="true">bug_report</mat-icon>
+        Bugs
+      </a>
+      }
+    </footer>
+  </div>
+</div>
