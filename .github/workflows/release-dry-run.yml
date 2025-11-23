@@ -1,8 +1,8 @@
 name: release-dry-run
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: [release]
 
 permissions:
   contents: read
@@ -10,12 +10,24 @@ permissions:
 jobs:
   preview:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
-      - run: npm ci --no-audit --no-fund
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: 'npm'
+
+      - name: Install deps (root)
+        run: npm install --omit=optional --no-audit --no-fund --ignore-scripts
+        env:
+          HUSKY: 0
+
       - name: Dry run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

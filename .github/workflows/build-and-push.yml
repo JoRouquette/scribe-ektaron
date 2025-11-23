@@ -17,6 +17,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Run tests
+        run: |
+          npm run test
+          # Example: npm ci && npm test
+          # If tests fail, the workflow will stop here
+
       - name: Log in to private registry
         run: |
           echo "${{ secrets.REGISTRY_PASSWORD }}" \
