@@ -1,27 +1,35 @@
 import express from 'express';
 import path from 'node:path';
-import { createAssetsUploadController } from './controllers/assetsUploadController';
-import { createPingController } from './controllers/pingController';
-import { createNoteUploadController } from './controllers/uploadController';
+
+import { LoggerPort } from '../../../application/ports/LoggerPort';
 
 // Adapters / services
+import { UploadAssetsHandler } from '../../../application/publishing/handlers/UploadAssetsHandler';
+import { UploadNotesHandler } from '../../../application/publishing/handlers/UploadNotesHandler';
+import { AbortSessionHandler } from '../../../application/sessions/handlers/AbortSessionHandler';
+import { CreateSessionHandler } from '../../../application/sessions/handlers/CreateSessionHandler';
+import { FinishSessionHandler } from '../../../application/sessions/handlers/FinishSessionHandler';
+import { EnvConfig } from '../../config/EnvConfig';
 import { AssetsFileSystemStorage } from '../../filesystem/AssetsFileSystemStorage';
+import { FileSystemSessionRepository } from '../../filesystem/FileSystemSessionRepository';
+import { ManifestFileSystem } from '../../filesystem/ManifestFileSystem';
 import { NotesFileSystemStorage } from '../../filesystem/NotesFileSystemStorage';
-import { NotesFileSystem } from '../../filesystem/NotesFileSystem';
+import { UuidIdGenerator } from '../../id/UuidIdGenerator';
 import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
 
-import { UploadNotesUseCase } from '../../../application/usecases/UploadNotesUseCase';
-import { UploadAssetUseCase } from '../../../application/usecases/UploadAssetUseCase';
-import { EnvConfig } from '../../config/EnvConfig';
+import { createHealthCheckController } from './controllers/HealthCheckController';
+import { createPingController } from './controllers/PingController';
+import { createSessionController } from './controllers/SessionController';
+
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
-import { LoggerPort } from '../../../application/ports/LoggerPort';
-import { createHealthCheckController } from './controllers/healthCheckController';
+
+export const BYTES_LIMIT = '10mb';
 
 export function createApp(rootLogger?: LoggerPort) {
   const app = express();
 
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({ limit: BYTES_LIMIT }));
 
   app.use(createCorsMiddleware(EnvConfig.allowedOrigins()));
   const apiKeyMiddleware = createApiKeyAuthMiddleware(EnvConfig.apiKey());
@@ -41,17 +49,20 @@ export function createApp(rootLogger?: LoggerPort) {
 
   const markdownRenderer = new MarkdownItRenderer();
   const noteStorage = new NotesFileSystemStorage(EnvConfig.contentRoot(), rootLogger);
-  const noteFileSystem = new NotesFileSystem(EnvConfig.contentRoot(), rootLogger);
-
-  const publishNotesUseCase = new UploadNotesUseCase(
+  const manifestFileSystem = new ManifestFileSystem(EnvConfig.contentRoot(), rootLogger);
+  const assetStorage = new AssetsFileSystemStorage(EnvConfig.assetsRoot(), rootLogger);
+  const sessionRepository = new FileSystemSessionRepository(EnvConfig.contentRoot());
+  const idGenerator = new UuidIdGenerator();
+  const uploadNotesHandler = new UploadNotesHandler(
     markdownRenderer,
     noteStorage,
-    noteFileSystem,
+    manifestFileSystem,
     rootLogger
   );
-
-  const assetStorage = new AssetsFileSystemStorage(EnvConfig.assetsRoot(), rootLogger);
-  const uploadAssetUseCase = new UploadAssetUseCase(assetStorage, rootLogger);
+  const uploadAssetsHandler = new UploadAssetsHandler(assetStorage, rootLogger);
+  const createSessionHandler = new CreateSessionHandler(idGenerator, sessionRepository, rootLogger);
+  const finishSessionHandler = new FinishSessionHandler(sessionRepository, rootLogger);
+  const abortSessionHandler = new AbortSessionHandler(sessionRepository, rootLogger);
 
   // API routes (protégées par API key)
   const apiRouter = express.Router();
@@ -59,13 +70,20 @@ export function createApp(rootLogger?: LoggerPort) {
 
   apiRouter.use(createPingController(rootLogger));
 
-  apiRouter.use(createNoteUploadController(publishNotesUseCase, rootLogger));
-
-  apiRouter.use(createAssetsUploadController(uploadAssetUseCase, rootLogger));
+  apiRouter.use(
+    createSessionController(
+      createSessionHandler,
+      finishSessionHandler,
+      abortSessionHandler,
+      uploadNotesHandler,
+      uploadAssetsHandler,
+      rootLogger
+    )
+  );
 
   app.use('/api', apiRouter);
 
-  const ANGULAR_DIST = path.resolve(EnvConfig.uiRoot());
+  const ANGULAR_DIST = EnvConfig.uiRoot();
   app.use(express.static(ANGULAR_DIST));
 
   // Log each incoming request

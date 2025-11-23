@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { resolveWithinRoot } from './pathUtils';
-import { AssetStoragePort } from '../../application/ports/AssetStoragePort';
+import { resolveWithinRoot } from '../utils/pathUtils';
+import { AssetStoragePort } from '../../application/publishing/ports/AssetsStoragePort';
 import { LoggerPort } from '../../application/ports/LoggerPort';
 
 export class AssetsFileSystemStorage implements AssetStoragePort {
@@ -10,9 +10,14 @@ export class AssetsFileSystemStorage implements AssetStoragePort {
     private readonly logger?: LoggerPort
   ) {}
 
-  async save(params: { filename: string; content: Buffer }): Promise<void> {
-    const { filename: relativeAssetPath, content } = params;
+  async save(params: { filename: string; content: Buffer }[]): Promise<void> {
+    const savePromises = params.map(({ filename, content }) =>
+      this.saveSingleAsset(filename, content)
+    );
+    await Promise.all(savePromises);
+  }
 
+  private async saveSingleAsset(relativeAssetPath: string, content: Buffer): Promise<void> {
     const normalizedRelative = relativeAssetPath.replace(/^[/\\]+/, '');
     const fullPath = resolveWithinRoot(this.assetsRoot, normalizedRelative);
 
