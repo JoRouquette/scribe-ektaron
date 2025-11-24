@@ -1,3 +1,17 @@
 const nxPreset = require('@nx/jest/preset').default;
 
-module.exports = { ...nxPreset };
+/** @type {import('jest').Config} */
+module.exports = {
+  ...nxPreset,
+
+  coverageReporters: ['lcov', 'text-summary'],
+
+  coverageThreshold: {
+    global: {
+      statements: 85,
+      branches: 85,
+      functions: 85,
+      lines: 85,
+    },
+  },
+};

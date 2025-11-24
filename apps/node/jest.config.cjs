@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 module.exports = {
   displayName: 'node',
   preset: '../../jest.preset.js',

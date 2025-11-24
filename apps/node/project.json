@@ -81,8 +81,10 @@
       }
     },
     "test": {
-      "options": {
-        "passWithNoTests": true
+      "configurations": {
+        "ci": {
+          "codeCoverage": true
+        }
       }
     }
   }

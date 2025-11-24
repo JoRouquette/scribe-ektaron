@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 module.exports = {
   displayName: 'core-domain',
   preset: '../../jest.preset.js',
