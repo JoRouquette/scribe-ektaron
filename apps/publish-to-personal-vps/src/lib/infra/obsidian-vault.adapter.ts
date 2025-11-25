@@ -1,8 +1,8 @@
-import type { CollectedNote } from '@core-domain/publish/CollectedNote';
+import type { CollectedNote } from '@core-domain/entities/CollectedNote';
 import { App, TAbstractFile, TFile, TFolder } from 'obsidian';
-import type { FolderConfig } from '@core-domain/publish/FolderConfig';
-import type { LoggerPort } from '@core-domain/publish/ports/logger-port';
-import type { VaultPort } from '@core-domain/publish/ports/vault-port';
+import type { FolderConfig } from '@core-domain/entities/FolderConfig';
+import type { LoggerPort } from '@core-domain/ports/logger-port';
+import type { VaultPort } from '@core-domain/ports/vault-port';
 
 export class ObsidianVaultAdapter implements VaultPort<CollectedNote[]> {
   private readonly logger: LoggerPort;

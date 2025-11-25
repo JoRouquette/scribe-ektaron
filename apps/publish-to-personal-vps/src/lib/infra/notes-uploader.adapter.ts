@@ -1,10 +1,10 @@
-import { DomainFrontmatter, FolderConfig } from '@core-domain/publish';
+import { DomainFrontmatter, FolderConfig } from '@core-domain/entities';
 import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
 import { requestUrl, RequestUrlResponse } from 'obsidian';
-import type { PublishableNote } from '@core-domain/publish/PublishableNote';
-import type { UploaderPort } from '@core-domain/publish/uploader-port';
-import type { VpsConfig } from '@core-domain/publish/VpsConfig';
-import type { LoggerPort } from '@core-domain/publish/ports/logger-port';
+import type { PublishableNote } from '@core-domain/entities/PublishableNote';
+import type { UploaderPort } from '@core-domain/ports/uploader-port';
+import type { VpsConfig } from '@core-domain/entities/VpsConfig';
+import type { LoggerPort } from '@core-domain/ports/logger-port';
 
 type ApiNote = {
   id: string;

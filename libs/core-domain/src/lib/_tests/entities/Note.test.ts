@@ -3,7 +3,7 @@ import {
   NoteCore,
   DomainFrontmatter,
   NoteWithAssets,
-  NoteWithWikiLinks,
+  NoteWithWikilinks as NoteWithWikiLinks,
   NoteRoutingInfo,
   AssetRef,
   AssetDisplayOptions,
@@ -12,12 +12,13 @@ import {
   VpsConfig,
   WikilinkRef,
   ResolvedWikilink,
-} from '../../entities/Note';
+} from '@core-domain';
 
 describe('Note Entities', () => {
   const baseFrontmatter: DomainFrontmatter = {
     flat: { foo: 'bar' },
     nested: { baz: { qux: 1 } },
+    tags: [],
   };
 
   const folderConfig: FolderConfig = {

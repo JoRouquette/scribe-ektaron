@@ -1,4 +1,4 @@
-import { PublishPluginSettings } from '@core-domain/publish';
+import { PublishPluginSettings } from '@core-domain/entities';
 import { DEFAULT_IGNORE_RULES } from './DEFAULT_IGNORE_RULES';
 
 const DEFAULT_SETTINGS: PublishPluginSettings & { locale?: any } = {

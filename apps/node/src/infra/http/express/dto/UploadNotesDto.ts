@@ -59,6 +59,7 @@ export const VpsConfigDto = z.object({
 export const DomainFrontmatterDto = z.object({
   flat: z.record(z.string(), z.unknown()),
   nested: z.record(z.string(), z.unknown()),
+  tags: z.array(z.string()).default([]),
 });
 
 // NoteCore
@@ -68,9 +69,7 @@ export const NoteCoreDto = z.object({
   vaultPath: z.string(),
   relativePath: z.string(),
   content: z.string(),
-  frontmatter: DomainFrontmatterDto.extend({
-    tags: z.array(z.string()),
-  }),
+  frontmatter: DomainFrontmatterDto,
   folderConfig: FolderConfigDto,
   vpsConfig: VpsConfigDto,
 });

@@ -1,5 +1,5 @@
 import { Notice } from 'obsidian';
-import type { ProgressPort } from '@core-domain/publish/ports/progress-port';
+import type { ProgressPort } from '@core-domain/ports/progress-port';
 
 export class NoticeProgressAdapter implements ProgressPort {
   private notice: Notice | null = null;

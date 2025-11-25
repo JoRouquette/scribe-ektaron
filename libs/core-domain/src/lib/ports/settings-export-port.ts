@@ -1,4 +1,4 @@
-import type { PublishPluginSettings } from '../domain/PublishPluginSettings';
+import type { PublishPluginSettings } from '../entities/PublishPluginSettings';
 
 export interface SettingsExportPort {
   /**

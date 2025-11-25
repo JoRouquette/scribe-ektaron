@@ -1,6 +1,6 @@
-import { HttpResponse } from '@core-domain/publish/HttpResponse';
-import type { VpsConfig } from '@core-domain/publish/VpsConfig';
-import { type LoggerPort } from '@core-domain/publish/ports/logger-port';
+import { HttpResponse } from '@core-domain/entities/HttpResponse';
+import type { VpsConfig } from '@core-domain/entities/VpsConfig';
+import { type LoggerPort } from '@core-domain/ports/logger-port';
 import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
 import { requestUrl, RequestUrlResponse } from 'obsidian';
 

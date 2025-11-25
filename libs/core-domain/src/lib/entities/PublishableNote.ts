@@ -12,6 +12,7 @@ import type { WikilinkRef } from './WikilinkRef';
  */
 export interface PublishableNote extends NoteCore {
   routing: NoteRoutingInfo;
+  publishedAt: Date;
   assets?: AssetRef[];
   wikilinks?: WikilinkRef[];
   resolvedWikilinks?: ResolvedWikilink[];

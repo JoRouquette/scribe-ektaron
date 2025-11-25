@@ -1,30 +1,27 @@
 import { Notice, Plugin, RequestUrlResponse } from 'obsidian';
 
-import type { PublishPluginSettings } from '@core-domain/publish/PublishPluginSettings';
+import type { PublishPluginSettings } from '@core-domain/entities/PublishPluginSettings';
 import type { I18nSettings } from './i18n';
 import { getTranslations } from './i18n';
 
 import { decryptApiKey, encryptApiKey } from './lib/api-key-crypto';
-import { GuidGeneratorAdapter } from './lib/guid-generator.adapter';
-import { NoticeProgressAdapter } from './lib/notice-progress.adapter';
-import { ObsidianVaultAdapter } from './lib/obsidian-vault.adapter';
+import { GuidGeneratorAdapter } from './lib/infra/guid-generator.adapter';
+import { NoticeProgressAdapter } from './lib/infra/notice-progress.adapter';
+import { ObsidianVaultAdapter } from './lib/infra/obsidian-vault.adapter';
 import { testVpsConnection } from './lib/services/http-connection.service';
 import { PublishToPersonalVpsSettingTab } from './lib/setting-tab';
 
 import { PublishToSiteUseCase } from '@core-application/publish/usecases/publish-notes-to-site.usecase';
-import {
-  extractNotesWithAssets,
-  type NoteWithAssets,
-} from '@core-domain/publish/NoteWithAssets';
-import type { PublishableNote } from '@core-domain/publish/PublishableNote';
+import { extractNotesWithAssets, type NoteWithAssets } from '@core-domain/entities/NoteWithAssets';
+import type { PublishableNote } from '@core-domain/entities/PublishableNote';
 import { PublishAssetsToSiteUseCase } from '@core-application/publish/usecases/publish-assets-to-site.usecase';
-import { ObsidianAssetsVaultAdapter } from './lib/obsidian-assets-vault.adapter';
+import { ObsidianAssetsVaultAdapter } from './lib/infra/obsidian-assets-vault.adapter';
 
-import { HttpResponse } from '@core-domain/publish/HttpResponse';
+import { HttpResponse } from '@core-domain/entities/HttpResponse';
 import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
-import { AssetsUploaderAdapter } from './lib/assets-uploader.adapter';
-import { ConsoleLoggerAdapter } from './lib/console-logger.adapter';
-import { NotesUploaderAdapter } from './lib/notes-uploader.adapter';
+import { AssetsUploaderAdapter } from './lib/infra/assets-uploader.adapter';
+import { ConsoleLoggerAdapter } from './lib/infra/console-logger.adapter';
+import { NotesUploaderAdapter } from './lib/infra/notes-uploader.adapter';
 import { RequestUrlResponseMapper } from './lib/utils/HttpResponseStatus.mapper';
 
 // -----------------------------------------------------------------------------
@@ -100,14 +97,11 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     this.logger.debug('Plugin loading...');
 
     this.responseHandler = new HttpResponseHandler<RequestUrlResponse>(
-      (res: RequestUrlResponse) =>
-        new RequestUrlResponseMapper(this.logger).execute(res),
+      (res: RequestUrlResponse) => new RequestUrlResponseMapper(this.logger).execute(res),
       this.logger
     );
 
-    this.addSettingTab(
-      new PublishToPersonalVpsSettingTab(this.app, this, this.logger)
-    );
+    this.addSettingTab(new PublishToPersonalVpsSettingTab(this.app, this, this.logger));
 
     this.addCommand({
       id: 'publish-to-personal-vps',
@@ -195,11 +189,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     const vps = settings.vpsConfigs[0];
     const vault = new ObsidianVaultAdapter(this.app, this.logger);
     const guidGenerator = new GuidGeneratorAdapter();
-    const notesUploader = new NotesUploaderAdapter(
-      vps,
-      this.responseHandler,
-      this.logger
-    );
+    const notesUploader = new NotesUploaderAdapter(vps, this.responseHandler, this.logger);
     const publishNotesUsecase = new PublishToSiteUseCase(
       vault,
       notesUploader,
@@ -209,10 +199,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     const notesProgress = new NoticeProgressAdapter();
     const coreSettings = buildCoreSettings(settings);
 
-    const result = await publishNotesUsecase.execute(
-      coreSettings,
-      notesProgress
-    );
+    const result = await publishNotesUsecase.execute(coreSettings, notesProgress);
 
     if (result.type === 'noConfig') {
       new Notice('⚠️ No folders or VPS configured.');
@@ -240,18 +227,12 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
 
     const notesWithAssets: NoteWithAssets[] = extractNotesWithAssets(notes);
     if (notesWithAssets.length === 0) {
-      new Notice(
-        `✅ Published ${publishedNotesCount} note(s). No assets to publish.`
-      );
+      new Notice(`✅ Published ${publishedNotesCount} note(s). No assets to publish.`);
       return;
     }
 
     const assetsVault = new ObsidianAssetsVaultAdapter(this.app, this.logger);
-    const assetsUploader = new AssetsUploaderAdapter(
-      vps,
-      this.responseHandler,
-      this.logger
-    );
+    const assetsUploader = new AssetsUploaderAdapter(vps, this.responseHandler, this.logger);
     const publishAssetsUsecase = new PublishAssetsToSiteUseCase(
       assetsVault,
       assetsUploader,
@@ -268,9 +249,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
 
     switch (assetsResult.type) {
       case 'noAssets':
-        new Notice(
-          `✅ Published ${publishedNotesCount} note(s). No assets to publish.`
-        );
+        new Notice(`✅ Published ${publishedNotesCount} note(s). No assets to publish.`);
         break;
       case 'error':
         this.logger.error('Error while publishing assets:', assetsResult.error);
@@ -309,11 +288,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     }
 
     const vps = settings.vpsConfigs[0];
-    const res: HttpResponse = await testVpsConnection(
-      vps,
-      this.responseHandler,
-      this.logger
-    );
+    const res: HttpResponse = await testVpsConnection(vps, this.responseHandler, this.logger);
 
     if (!res.isError) {
       this.logger.info('VPS connection test succeeded');
@@ -323,9 +298,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
       this.logger.error('VPS connection test failed: ', res.error);
       new Notice(
         `${t.settings.testConnection.failed} ${
-          res.error instanceof Error
-            ? res.error.message
-            : JSON.stringify(res.error)
+          res.error instanceof Error ? res.error.message : JSON.stringify(res.error)
         }`
       );
     }

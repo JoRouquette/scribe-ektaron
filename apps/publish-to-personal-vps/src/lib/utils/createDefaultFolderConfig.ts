@@ -1,4 +1,4 @@
-import type { FolderConfig } from '@core-domain/publish';
+import type { FolderConfig } from '@core-domain/entities';
 
 // helper
 export function createDefaultFolderConfig(

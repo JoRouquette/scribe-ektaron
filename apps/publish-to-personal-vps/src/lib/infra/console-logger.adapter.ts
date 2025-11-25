@@ -1,8 +1,5 @@
-import {
-  LoggerPort,
-  LogLevel,
-} from '@core-domain/publish/ports/logger-port';
-import { DEFAULT_LOGGER_LEVEL } from './constants/DEFAULT_LOGGER_LEVEL';
+import { LoggerPort, LogLevel } from '@core-domain/ports/logger-port';
+import { DEFAULT_LOGGER_LEVEL } from '../constants/DEFAULT_LOGGER_LEVEL';
 
 /*
 export enum LogLevel {
@@ -31,10 +28,7 @@ export class ConsoleLoggerAdapter implements LoggerPort {
     return this._level;
   }
 
-  child(
-    context: Record<string, unknown>,
-    level?: LogLevel
-  ): ConsoleLoggerAdapter {
+  child(context: Record<string, unknown>, level?: LogLevel): ConsoleLoggerAdapter {
     let logLevel;
     if (level === undefined) {
       logLevel = this._level;
@@ -50,12 +44,7 @@ export class ConsoleLoggerAdapter implements LoggerPort {
       return;
     }
 
-    console.debug(
-      `[${this.getCurrentDatetime()}] [debug]`,
-      message,
-      ...args,
-      this._context
-    );
+    console.debug(`[${this.getCurrentDatetime()}] [debug]`, message, ...args, this._context);
   }
 
   info(message: string, ...args: unknown[]): void {
@@ -63,12 +52,7 @@ export class ConsoleLoggerAdapter implements LoggerPort {
       return;
     }
 
-    console.info(
-      `[${this.getCurrentDatetime()}] [info]`,
-      message,
-      ...args,
-      this._context
-    );
+    console.info(`[${this.getCurrentDatetime()}] [info]`, message, ...args, this._context);
   }
 
   warn(message: string, ...args: unknown[]): void {
@@ -76,12 +60,7 @@ export class ConsoleLoggerAdapter implements LoggerPort {
       return;
     }
 
-    console.warn(
-      `[${this.getCurrentDatetime()}] [warn]`,
-      message,
-      ...args,
-      this._context
-    );
+    console.warn(`[${this.getCurrentDatetime()}] [warn]`, message, ...args, this._context);
   }
 
   error(message: string, ...args: unknown[]): void {
@@ -89,12 +68,7 @@ export class ConsoleLoggerAdapter implements LoggerPort {
       return;
     }
 
-    console.error(
-      `[${this.getCurrentDatetime()}] [error]`,
-      message,
-      ...args,
-      this._context
-    );
+    console.error(`[${this.getCurrentDatetime()}] [error]`, message, ...args, this._context);
   }
 
   private getCurrentDatetime(): string {
@@ -103,12 +77,9 @@ export class ConsoleLoggerAdapter implements LoggerPort {
 
   private getComposedLevel(level: LogLevel): LogLevel {
     // Si le niveau contient plusieurs bits, on considère que c'est déjà un masque
-    const bits = [
-      LogLevel.error,
-      LogLevel.warn,
-      LogLevel.info,
-      LogLevel.debug,
-    ].filter((l) => (level & l) !== 0).length;
+    const bits = [LogLevel.error, LogLevel.warn, LogLevel.info, LogLevel.debug].filter(
+      (l) => (level & l) !== 0
+    ).length;
 
     if (bits > 1) {
       return level;

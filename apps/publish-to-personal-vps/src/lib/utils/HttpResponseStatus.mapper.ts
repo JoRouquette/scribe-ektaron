@@ -1,8 +1,8 @@
 import {
   ApiRequestMapper,
   MappingResult,
-} from '@core-domain/publish/Mapper';
-import { LoggerPort } from '@core-domain/publish/ports/logger-port';
+} from '@core-domain/utils/Mapper';
+import { LoggerPort } from '@core-domain/ports/logger-port';
 import { RequestUrlResponse } from 'obsidian';
 
 export class RequestUrlResponseMapper

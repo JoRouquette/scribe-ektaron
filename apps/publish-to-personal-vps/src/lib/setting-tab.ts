@@ -1,10 +1,10 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
-import type { VpsConfig } from '@core-domain/publish/VpsConfig';
+import type { VpsConfig } from '@core-domain/entities/VpsConfig';
 import { getTranslations } from '../i18n';
 import PublishToPersonalVpsPlugin from '../main';
 import { createDefaultFolderConfig } from './utils/createDefaultFolderConfig';
 import { FolderSuggest } from './FolderSuggest';
-import { LoggerPort } from '@core-domain/publish/ports/logger-port';
+import { LoggerPort } from '@core-domain/ports/logger-port';
 
 export class PublishToPersonalVpsSettingTab extends PluginSettingTab {
   private readonly plugin: PublishToPersonalVpsPlugin;

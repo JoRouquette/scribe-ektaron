@@ -1,7 +1,6 @@
-// ports/assets-vault-port.ts
-import type { PublishableNote } from '../PublishableNote';
-import type { AssetRef } from '../AssetRef';
-import { ResolvedAssetFile } from '../ResolvedAssetFile';
+import type { PublishableNote } from '../entities/PublishableNote';
+import type { AssetRef } from '../entities/AssetRef';
+import { ResolvedAssetFile } from '../entities/ResolvedAssetFile';
 
 export interface AssetsVaultPort {
   resolveAssetForNote(

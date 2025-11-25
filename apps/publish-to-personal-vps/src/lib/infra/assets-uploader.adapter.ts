@@ -1,9 +1,9 @@
-import { UploaderPort } from '@core-domain/publish/uploader-port';
+import { UploaderPort } from '@core-domain/ports/uploader-port';
 import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
 import { requestUrl, RequestUrlResponse } from 'obsidian';
-import type { ResolvedAssetFile } from '@core-domain/publish/ResolvedAssetFile';
-import type { VpsConfig } from '@core-domain/publish/VpsConfig';
-import type { LoggerPort } from '@core-domain/publish/ports/logger-port';
+import type { ResolvedAssetFile } from '@core-domain/entities/ResolvedAssetFile';
+import type { VpsConfig } from '@core-domain/entities/VpsConfig';
+import type { LoggerPort } from '@core-domain/ports/logger-port';
 
 type ApiAsset = {
   relativePath: string;
