@@ -1,3 +1,46 @@
+## 2.0.0 (2025-11-25)
+
+* fix(routes,uploads): correct asset upload param, improve route building logs, update file storage ([5a79d64](https://github.com/JoRouquette/scribe-ektaron/commit/5a79d64))
+* Merge branch 'chore/migrate-to-nx' into release ([0e96c53](https://github.com/JoRouquette/scribe-ektaron/commit/0e96c53))
+* Merge branch 'feature/add-batched-upload' into release ([7c77f8c](https://github.com/JoRouquette/scribe-ektaron/commit/7c77f8c))
+* Merge branch 'fix/issues-semantic-versionning' into release ([f3d3bb9](https://github.com/JoRouquette/scribe-ektaron/commit/f3d3bb9))
+* Merge branch 'fix/issues-with-routes-and-uploads' into release ([cbc5806](https://github.com/JoRouquette/scribe-ektaron/commit/cbc5806))
+* Merge branch 'fix/tests-and-linting' into release ([18ee3ba](https://github.com/JoRouquette/scribe-ektaron/commit/18ee3ba))
+* Merge branch 'release' ([197dba7](https://github.com/JoRouquette/scribe-ektaron/commit/197dba7))
+* Merge branch 'release' ([63defbe](https://github.com/JoRouquette/scribe-ektaron/commit/63defbe))
+* Merge branch 'release' ([82fb8d9](https://github.com/JoRouquette/scribe-ektaron/commit/82fb8d9))
+* refactor(architecture)!: introduce CQRS handlers and feature ports ([eb7eddd](https://github.com/JoRouquette/scribe-ektaron/commit/eb7eddd))
+* chore: change logger level ([67b19d6](https://github.com/JoRouquette/scribe-ektaron/commit/67b19d6))
+* chore: fix build configuration ([0951cf7](https://github.com/JoRouquette/scribe-ektaron/commit/0951cf7))
+* chore: proper docker config ([3796aa0](https://github.com/JoRouquette/scribe-ektaron/commit/3796aa0))
+* chore: updating pre-push to include tests ([ae4bc7f](https://github.com/JoRouquette/scribe-ektaron/commit/ae4bc7f))
+* chore(backend): add session lifecycle and filesystem repository ([b9323f6](https://github.com/JoRouquette/scribe-ektaron/commit/b9323f6))
+* chore(ci): update release workflows to use Node.js 22.14.0 and optimize npm install ([105fa01](https://github.com/JoRouquette/scribe-ektaron/commit/105fa01))
+* chore(lint): enforce layered eslint rules and add pre-push hook ([ca23781](https://github.com/JoRouquette/scribe-ektaron/commit/ca23781))
+* chore(lint): migrate to flat config, add Nx plugin and enforce module boundaries ([cf43dcf](https://github.com/JoRouquette/scribe-ektaron/commit/cf43dcf))
+* chore(publishing): add batched note upload and session-based manifest updates ([be2038f](https://github.com/JoRouquette/scribe-ektaron/commit/be2038f))
+* test: implement jest.config.cjs files and update tsconfig files to reference them ([936a9af](https://github.com/JoRouquette/scribe-ektaron/commit/936a9af))
+* test(core-domain): add unit tests for Asset, Manifest, Note, and Session entities ([761a975](https://github.com/JoRouquette/scribe-ektaron/commit/761a975))
+* test(core-domain): refactor SessionError tests and update coverage config ([bb8991d](https://github.com/JoRouquette/scribe-ektaron/commit/bb8991d))
+* test(node): add coverage for infra components ([83d8a6e](https://github.com/JoRouquette/scribe-ektaron/commit/83d8a6e))
+* test(site): add unit coverage for queries and infra ([dde8fa5](https://github.com/JoRouquette/scribe-ektaron/commit/dde8fa5))
+* refactor: migrate monorepo to nx workspace ([7696edb](https://github.com/JoRouquette/scribe-ektaron/commit/7696edb))
+* refactor: rename NotesIndexPort to ManifestPort and update manifest structure ([23af6cc](https://github.com/JoRouquette/scribe-ektaron/commit/23af6cc))
+* refactor: simplify note and manifest models, remove unused fields and utilities ([5fbf829](https://github.com/JoRouquette/scribe-ektaron/commit/5fbf829))
+* refactor: unify content API, update config, and improve structure ([1822936](https://github.com/JoRouquette/scribe-ektaron/commit/1822936))
+* refactor(backend): unify note and asset index ports, rename files and update use cases ([73c16a3](https://github.com/JoRouquette/scribe-ektaron/commit/73c16a3))
+* refactor(core): update SiteIndexPort and PublishNotesUseCase to support logger injection ([7c25075](https://github.com/JoRouquette/scribe-ektaron/commit/7c25075))
+* feat(backend): refactor publishing and session flows, update note and asset handling ([5eb4ffe](https://github.com/JoRouquette/scribe-ektaron/commit/5eb4ffe))
+* fix: resolve static file serving, proxy config, and manifest loading ([d121460](https://github.com/JoRouquette/scribe-ektaron/commit/d121460))
+* fix: simplify asset upload flow and DTOs ([8786b8b](https://github.com/JoRouquette/scribe-ektaron/commit/8786b8b))
+* ci: unify env file naming, update Docker Compose and CI for multi-env support ([1554ee6](https://github.com/JoRouquette/scribe-ektaron/commit/1554ee6))
+
+
+### BREAKING CHANGE
+
+* legacy StoragePort/IndexPort and Upload*UseCase paths have been removed or moved,
+impacting imports and tests.
+
 ## 1.2.0 (2025-11-17)
 
 * chore:start implementing a better viewer ([e2940e8](https://github.com/JoRouquette/scribe-ektaron/commit/e2940e8))
