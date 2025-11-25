@@ -8,7 +8,6 @@ import {
   AssetRef,
   AssetDisplayOptions,
   FolderConfig,
-  SanitizationRules,
   VpsConfig,
   WikilinkRef,
   ResolvedWikilink,
@@ -18,7 +17,7 @@ describe('Note Entities', () => {
   const baseFrontmatter: DomainFrontmatter = {
     flat: { foo: 'bar' },
     nested: { baz: { qux: 1 } },
-    tags: [],
+    tags: ['test', 'note'],
   };
 
   const folderConfig: FolderConfig = {
@@ -80,12 +79,18 @@ describe('Note Entities', () => {
     vaultPath: '/vault/notes/note1.md',
     relativePath: 'notes/note1.md',
     content: 'This is a test note.',
-    frontmatter: {
-      tags: ['test', 'note'],
-      ...baseFrontmatter,
-    },
+    frontmatter: baseFrontmatter,
     folderConfig,
     vpsConfig,
+  };
+
+  const publishableNote: PublishableNote = {
+    ...noteCore,
+    publishedAt: new Date('2024-01-01T00:00:00Z'),
+    routing,
+    assets: [assetRef],
+    wikilinks: [wikilinkRef],
+    resolvedWikilinks: [resolvedWikilink],
   };
 
   it('should create a valid NoteCore object', () => {
@@ -96,14 +101,6 @@ describe('Note Entities', () => {
   });
 
   it('should create a valid PublishableNote', () => {
-    const publishableNote: PublishableNote = {
-      ...noteCore,
-      publishedAt: new Date('2024-01-01T00:00:00Z'),
-      routing,
-      assets: [assetRef],
-      wikilinks: [wikilinkRef],
-      resolvedWikilinks: [resolvedWikilink],
-    };
     expect(publishableNote.publishedAt).toBeInstanceOf(Date);
     expect(publishableNote.routing.slug).toBe('note-1');
     expect(publishableNote.assets?.[0].kind).toBe('image');
@@ -113,7 +110,7 @@ describe('Note Entities', () => {
 
   it('should create a valid NoteWithAssets', () => {
     const noteWithAssets: NoteWithAssets = {
-      ...noteCore,
+      ...publishableNote,
       assets: [assetRef],
     };
     expect(noteWithAssets.assets.length).toBe(1);
@@ -122,11 +119,11 @@ describe('Note Entities', () => {
 
   it('should create a valid NoteWithWikiLinks', () => {
     const noteWithWikiLinks: NoteWithWikiLinks = {
-      ...noteCore,
-      wikiLinks: [wikilinkRef],
+      ...publishableNote,
+      wikilinks: [wikilinkRef],
       resolvedWikilinks: [resolvedWikilink],
     };
-    expect(noteWithWikiLinks.wikiLinks[0].kind).toBe('note');
+    expect(noteWithWikiLinks.wikilinks[0].kind).toBe('note');
     expect(noteWithWikiLinks.resolvedWikilinks[0].isResolved).toBe(true);
     expect(noteWithWikiLinks.resolvedWikilinks[0].targetNoteId).toBe('note-a-id');
   });
