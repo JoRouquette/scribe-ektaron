@@ -105,7 +105,7 @@ describe('sessionController', () => {
           relativePath: 'r',
           frontmatter: { tags: [], flat: {}, nested: {} },
           folderConfig: { id: 'f', vaultFolder: 'v', routeBase: '/t', vpsId: 'vps' },
-          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', apiKey: 'k' },
+          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', api-key: 'k' },
         },
       ],
     });
@@ -168,7 +168,7 @@ describe('sessionController', () => {
           relativePath: 'r',
           frontmatter: { tags: [], flat: {}, nested: {} },
           folderConfig: { id: 'f', vaultFolder: 'v', routeBase: '/t', vpsId: 'vps' },
-          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', apiKey: 'k' },
+          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', api-key: 'k' },
         },
       ],
     });

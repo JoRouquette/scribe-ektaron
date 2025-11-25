@@ -52,7 +52,7 @@ export const VpsConfigDto = z.object({
   id: z.string(),
   name: z.string(),
   url: z.string(),
-  apiKey: z.string(),
+  api-key: z.string(),
 });
 
 // DomainFrontmatter
