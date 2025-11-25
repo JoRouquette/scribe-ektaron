@@ -7,3 +7,6 @@ export interface ContentSanitizerPort {
     rules: SanitizationRules | undefined
   ): PublishableNote;
 }
+
+// Alias for backward compatibility
+export type ContentSanitizer = ContentSanitizerPort;

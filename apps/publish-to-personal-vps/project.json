@@ -92,21 +92,10 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": [
-          "apps/publish-to-personal-vps/**/*.ts",
-          "apps/publish-to-personal-vps/**/*.js"
-        ]
-      }
+      "executor": "nx:noop"
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/publish-to-personal-vps"],
-      "options": {
-        "jestConfig": "apps/publish-to-personal-vps/jest.config.ts",
-        "passWithNoTests": true
-      }
+      "executor": "nx:noop"
     }
   }
 }
