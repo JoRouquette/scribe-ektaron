@@ -4,18 +4,37 @@ import path from 'node:path';
 const next = process.env.RELEASE_VERSION;
 if (!next) throw new Error('RELEASE_VERSION manquant');
 
-const files = ['package.json', 'apps/frontend/package.json', 'apps/backend/package.json'];
+const pkgFiles = ['package.json'];
+const lockFiles = ['package-lock.json'];
+const versionFiles = ['apps/site/src/version.ts', 'apps/node/src/version.ts'];
 
-for (const f of files) {
-  if (!fs.existsSync(f)) continue;
-  const j = JSON.parse(fs.readFileSync(f, 'utf8'));
-  j.version = next;
-  fs.writeFileSync(f, JSON.stringify(j, null, 2) + '\n');
-  console.log(`updated ${f} -> ${next}`);
+const updateJson = (filepath, updater) => {
+  if (!fs.existsSync(filepath)) return false;
+  const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+  const updated = updater(data);
+  fs.writeFileSync(filepath, JSON.stringify(updated, null, 2) + '\n');
+  console.log(`updated ${filepath} -> ${next}`);
+  return true;
+};
+
+for (const file of pkgFiles) {
+  updateJson(file, (json) => ({ ...json, version: next }));
 }
 
-const write = (p) => fs.writeFileSync(p, `export const APP_VERSION='${next}';\n`);
-fs.mkdirSync(path.dirname('apps/frontend/src/version.ts'), { recursive: true });
-fs.mkdirSync(path.dirname('apps/backend/src/version.ts'), { recursive: true });
-write('apps/frontend/src/version.ts');
-write('apps/backend/src/version.ts');
+for (const file of lockFiles) {
+  updateJson(file, (json) => {
+    const updated = { ...json, version: next };
+    if (updated.packages?.['']) {
+      updated.packages[''] = { ...updated.packages[''], version: next };
+    }
+    return updated;
+  });
+}
+
+const writeVersionFile = (p) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, `export const APP_VERSION='${next}';\n`);
+  console.log(`updated ${p} -> ${next}`);
+};
+
+versionFiles.forEach(writeVersionFile);
