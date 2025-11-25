@@ -3,6 +3,8 @@
   "version": "1.1.5",
   "scripts": {
     "prepare": "husky",
+    "start node": "nx serve node",
+    "start site": "nx serve site",
     "build": "nx run-many -t build --projects core-domain,core-application,node,site",
     "build:node": "nx build node",
     "build:site": "nx build site",
