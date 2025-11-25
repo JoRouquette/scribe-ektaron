@@ -1,10 +1,9 @@
 import { DomainFrontmatter, FolderConfig } from '@core-domain/entities';
-import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
-import { requestUrl, RequestUrlResponse } from 'obsidian';
 import type { PublishableNote } from '@core-domain/entities/PublishableNote';
 import type { UploaderPort } from '@core-domain/ports/uploader-port';
-import type { VpsConfig } from '@core-domain/entities/VpsConfig';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
+import { batchByBytes } from '../utils/batch-by-bytes.util';
+import { SessionApiClient } from '../services/session-api.client';
 
 type ApiNote = {
   id: string;
@@ -22,15 +21,14 @@ type ApiNote = {
 
 export class NotesUploaderAdapter implements UploaderPort {
   private readonly _logger: LoggerPort;
-  private readonly _handleResponse: HttpResponseHandler<RequestUrlResponse>;
 
   constructor(
-    private readonly vpsConfig: VpsConfig,
-    handleResponse: HttpResponseHandler<RequestUrlResponse>,
-    logger: LoggerPort
+    private readonly sessionClient: SessionApiClient,
+    private readonly sessionId: string,
+    logger: LoggerPort,
+    private readonly maxBytesPerRequest: number
   ) {
     this._logger = logger;
-    this._handleResponse = handleResponse;
   }
 
   async upload(notes: PublishableNote[]): Promise<boolean> {
@@ -39,9 +37,6 @@ export class NotesUploaderAdapter implements UploaderPort {
       return false;
     }
 
-    const vps = (notes[0] as any).vpsConfig ?? this.vpsConfig;
-    const apiKeyPlain = vps.apiKey;
-
     const apiNotes: ApiNote[] = notes.map((note) =>
       this.buildApiNote(
         note,
@@ -49,47 +44,21 @@ export class NotesUploaderAdapter implements UploaderPort {
       )
     );
 
-    const body = { notes: apiNotes };
+    const batches = batchByBytes(apiNotes, this.maxBytesPerRequest, (batch) => ({
+      notes: batch,
+    }));
 
     this._logger.info(
-      `Uploading ${apiNotes.length} notes to VPS at ${vps.url}`
+      `Uploading ${apiNotes.length} notes in ${batches.length} batch(es) (maxBytes=${this.maxBytesPerRequest})`
     );
 
-    const url = vps.url.replace(/\/$/, '') + '/api/upload';
-
-    try {
-      const response = await requestUrl({
-        url,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKeyPlain,
-        },
-        body: JSON.stringify(body),
-        throw: false,
-      });
-
-      const result = await this._handleResponse.handleResponseAsync({
-        response,
-        url,
-      });
-
-      if (result.isError) {
-        this._logger.error(
-          `Failed to upload notes: ${result.text}`,
-          result.error
-        );
-        return false;
-      }
-
-      this._logger.info('Successfully uploaded notes to VPS');
-      this._logger.debug('Upload response:', result);
-
-      return true;
-    } catch (error: any) {
-      this._logger.error(`Exception during upload: `, error);
-      return false;
+    for (const batch of batches) {
+      await this.sessionClient.uploadNotes(this.sessionId, batch);
+      this._logger.debug('Notes batch uploaded', { batchSize: batch.length });
     }
+
+    this._logger.info('Successfully uploaded notes to session');
+    return true;
   }
 
   // #region: private helpers

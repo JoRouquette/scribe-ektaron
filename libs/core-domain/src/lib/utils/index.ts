@@ -1,2 +1,2 @@
-export * from './Mapper';
+export * from './mapper.util';
 export * from './string.utils';

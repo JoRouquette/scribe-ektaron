@@ -95,7 +95,12 @@
       "executor": "nx:noop"
     },
     "test": {
-      "executor": "nx:noop"
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/apps/publish-to-personal-vps"],
+      "options": {
+        "jestConfig": "apps/publish-to-personal-vps/jest.config.cjs",
+        "runInBand": true
+      }
     }
   }
 }

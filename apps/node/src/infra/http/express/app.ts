@@ -20,7 +20,7 @@ import { MarkdownItRenderer } from '../../markdown/MarkdownItRenderer';
 
 import { createHealthCheckController } from './controllers/healthCheckController';
 import { createPingController } from './controllers/pingController';
-import { createSessionController } from './controllers/sessionController';
+import { createSessionController } from './controllers/session-controller';
 import { createApiKeyAuthMiddleware } from './middleware/apiKeyAuthMiddleware';
 import { createCorsMiddleware } from './middleware/corsMiddleware';
 

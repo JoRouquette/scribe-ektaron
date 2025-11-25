@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { SessionInvalidError, SessionNotFoundError } from '@core-domain';
 
-import { createSessionController } from '../infra/http/express/controllers/sessionController';
+import { createSessionController } from '../infra/http/express/controllers/session-controller';
 
 describe('sessionController', () => {
   const createSessionHandler = {

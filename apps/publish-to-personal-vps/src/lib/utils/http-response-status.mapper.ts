@@ -1,7 +1,4 @@
-import {
-  ApiRequestMapper,
-  MappingResult,
-} from '@core-domain/utils/Mapper';
+import { ApiRequestMapper, MappingResult } from '@core-domain/utils/mapper.util';
 import { LoggerPort } from '@core-domain/ports/logger-port';
 import { RequestUrlResponse } from 'obsidian';
 

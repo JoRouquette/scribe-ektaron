@@ -14,10 +14,10 @@ import {
 import { SessionInvalidError, SessionNotFoundError } from '@core-domain';
 
 import { BYTES_LIMIT } from '../app';
-import { CreateSessionBodyDto } from '../dto/CreateSessionBodyDto';
-import { FinishSessionBodyDto } from '../dto/FinishSessionBodyDto';
-import { ApiAssetsBodyDto } from '../dto/UploadAssetsDto';
-import { UploadSessionNotesBodyDto } from '../dto/UploadSessionNotesBodyDto';
+import { CreateSessionBodyDto } from '../dto/create-session-body.dto';
+import { FinishSessionBodyDto } from '../dto/finish-session-body.dto';
+import { ApiAssetsBodyDto } from '../dto/upload-assets.dto';
+import { UploadSessionNotesBodyDto } from '../dto/upload-session-notes-body.dto';
 
 export function createSessionController(
   createSessionHandler: CreateSessionHandler,
@@ -91,11 +91,9 @@ export function createSessionController(
       return res.status(400).json({ status: 'invalid_payload' });
     }
 
-    const { notes } = parsed.data;
-
     const command: UploadNotesCommand = {
       sessionId: req.params.sessionId,
-      notes: [],
+      notes: parsed.data.notes,
     };
 
     try {
@@ -115,7 +113,7 @@ export function createSessionController(
       return res.status(200).json({
         sessionId: result.sessionId,
         publishedCount: result.published,
-        errors: result.errors,
+        errors: result.errors ?? [],
       });
     } catch (err) {
       routeLogger?.error('Error while publishing notes', { err });
@@ -137,11 +135,9 @@ export function createSessionController(
       return res.status(400).json({ status: 'invalid_payload' });
     }
 
-    const { assets } = parsed.data;
-
     const command: UploadAssetsCommand = {
       sessionId: req.params.sessionId,
-      assets: [],
+      assets: parsed.data.assets,
     };
 
     try {

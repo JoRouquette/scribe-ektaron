@@ -1,9 +1,8 @@
 import { UploaderPort } from '@core-domain/ports/uploader-port';
-import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
-import { requestUrl, RequestUrlResponse } from 'obsidian';
 import type { ResolvedAssetFile } from '@core-domain/entities/ResolvedAssetFile';
-import type { VpsConfig } from '@core-domain/entities/VpsConfig';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
+import { SessionApiClient } from '../services/session-api.client';
+import { batchByBytes } from '../utils/batch-by-bytes.util';
 
 type ApiAsset = {
   relativePath: string;
@@ -15,17 +14,14 @@ type ApiAsset = {
 
 export class AssetsUploaderAdapter implements UploaderPort {
   private readonly _logger: LoggerPort;
-  private readonly _handleResponse: HttpResponseHandler<RequestUrlResponse>;
-  private readonly vpsConfig: VpsConfig;
 
   constructor(
-    vpsConfig: VpsConfig,
-    handleResponse: HttpResponseHandler<RequestUrlResponse>,
-    logger: LoggerPort
+    private readonly sessionClient: SessionApiClient,
+    private readonly sessionId: string,
+    logger: LoggerPort,
+    private readonly maxBytesPerRequest: number
   ) {
-    this.vpsConfig = vpsConfig;
     this._logger = logger.child({ adapter: 'AssetsUploaderAdapter' });
-    this._handleResponse = handleResponse;
     this._logger.debug('AssetsUploaderAdapter initialized');
   }
 
@@ -49,55 +45,22 @@ export class AssetsUploaderAdapter implements UploaderPort {
       throw err;
     }
 
-    const body = { assets: apiAssets };
-    const vps = this.vpsConfig;
+    const batches = batchByBytes(apiAssets, this.maxBytesPerRequest, (batch) => ({
+      assets: batch,
+    }));
 
-    const url = vps.url.replace(/\/$/, '') + '/api/assets/upload';
-
-    this._logger.info('Uploading assets to VPS', {
-      url,
+    this._logger.info('Uploading assets to session', {
+      batchCount: batches.length,
       assetCount: apiAssets.length,
     });
 
-    try {
-      const response = await requestUrl({
-        url,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': vps.apiKey,
-        },
-        body: JSON.stringify(body),
-        throw: false,
-      });
-
-      const result = await this._handleResponse.handleResponseAsync({
-        response,
-        url,
-      });
-
-      this._logger.info('Assets upload completed');
-
-      if (result.isError) {
-        this._logger.error('Assets upload failed', {
-          error: result.error,
-          httpStatus: result.httpStatus,
-          text: result.text,
-        });
-
-        throw result.error ?? new Error('Unknown assets upload error');
-      }
-
-      this._logger.debug('Assets upload response', {
-        httpStatus: result.httpStatus,
-        text: result.text,
-      });
-
-      return true;
-    } catch (err) {
-      this._logger.error('HTTP request to upload assets failed', err);
-      throw err;
+    for (const batch of batches) {
+      await this.sessionClient.uploadAssets(this.sessionId, batch);
+      this._logger.debug('Assets batch uploaded', { batchSize: batch.length });
     }
+
+    this._logger.info('Assets upload completed');
+    return true;
   }
 
   private async buildApiAsset(asset: ResolvedAssetFile): Promise<ApiAsset> {

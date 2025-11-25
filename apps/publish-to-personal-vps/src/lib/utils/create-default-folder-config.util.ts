@@ -1,6 +1,5 @@
 import type { FolderConfig } from '@core-domain/entities';
 
-// helper
 export function createDefaultFolderConfig(
   vpsId: string,
   overrideDefaults: Partial<FolderConfig> = {}

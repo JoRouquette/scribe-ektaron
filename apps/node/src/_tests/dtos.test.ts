@@ -1,7 +1,7 @@
-import { CreateSessionBodyDto } from '../infra/http/express/dto/CreateSessionBodyDto';
-import { FinishSessionBodyDto } from '../infra/http/express/dto/FinishSessionBodyDto';
-import { ApiAssetsBodyDto } from '../infra/http/express/dto/UploadAssetsDto';
-import { UploadSessionNotesBodyDto } from '../infra/http/express/dto/UploadSessionNotesBodyDto';
+import { CreateSessionBodyDto } from '../infra/http/express/dto/create-session-body.dto';
+import { FinishSessionBodyDto } from '../infra/http/express/dto/finish-session-body.dto';
+import { ApiAssetsBodyDto } from '../infra/http/express/dto/upload-assets.dto';
+import { UploadSessionNotesBodyDto } from '../infra/http/express/dto/upload-session-notes-body.dto';
 
 describe('DTO validation', () => {
   it('validates CreateSessionBodyDto', () => {

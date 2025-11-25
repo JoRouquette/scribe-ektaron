@@ -5,11 +5,8 @@ import type { I18nSettings } from './i18n';
 import { getTranslations } from './i18n';
 
 import { decryptApiKey, encryptApiKey } from './lib/api-key-crypto';
-import { GuidGeneratorAdapter } from './lib/infra/guid-generator.adapter';
-import { NoticeProgressAdapter } from './lib/infra/notice-progress.adapter';
-import { ObsidianVaultAdapter } from './lib/infra/obsidian-vault.adapter';
 import { testVpsConnection } from './lib/services/http-connection.service';
-import { PublishToPersonalVpsSettingTab } from './lib/setting-tab';
+import { PublishToPersonalVpsSettingTab } from './lib/setting-tab.view';
 
 import { PublishToSiteUseCase } from '@core-application/publish/usecases/publish-notes-to-site.usecase';
 import { extractNotesWithAssets, type NoteWithAssets } from '@core-domain/entities/NoteWithAssets';
@@ -22,7 +19,14 @@ import { HttpResponseHandler } from '@core-application/publish/handler/http-resp
 import { AssetsUploaderAdapter } from './lib/infra/assets-uploader.adapter';
 import { ConsoleLoggerAdapter } from './lib/infra/console-logger.adapter';
 import { NotesUploaderAdapter } from './lib/infra/notes-uploader.adapter';
-import { RequestUrlResponseMapper } from './lib/utils/HttpResponseStatus.mapper';
+import { RequestUrlResponseMapper } from './lib/utils/http-response-status.mapper';
+import { SessionApiClient } from './lib/services/session-api.client';
+import { defaultSettings } from './lib/constants/default-settings.constant';
+import { GuidGeneratorAdapter } from './lib/infra/guid-generator.adapter';
+import { NoticeProgressAdapter } from './lib/infra/notice-progress.adapter';
+import { ObsidianVaultAdapter } from './lib/infra/obsidian-vault.adapter';
+import type { UploaderPort } from '@core-domain/ports/uploader-port';
+import type { LoggerPort } from '@core-domain/ports/logger-port';
 
 // -----------------------------------------------------------------------------
 // Types & Constants
@@ -37,7 +41,7 @@ type PluginSettings = PublishPluginSettings &
     enableAssetsVaultFallback: boolean;
   };
 
-const DEFAULT_SETTINGS: PluginSettings = {
+const defaultSettings: PluginSettings = {
   vpsConfigs: [],
   folders: [],
   ignoreRules: [],
@@ -79,6 +83,17 @@ function withDecryptedApiKeys(settings: PluginSettings): PluginSettings {
 function buildCoreSettings(settings: PluginSettings): PublishPluginSettings {
   const { vpsConfigs, folders, ignoreRules } = settings;
   return { vpsConfigs, folders, ignoreRules };
+}
+
+class CollectingUploader implements UploaderPort {
+  notes: PublishableNote[] = [];
+  constructor(private readonly logger: LoggerPort) {}
+
+  async upload(notes: PublishableNote[]): Promise<boolean> {
+    this.notes.push(...notes);
+    this.logger.debug('Collected notes for deferred upload', { count: notes.length });
+    return true;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -156,7 +171,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
       this.logger.error('Failed to load snapshot settings', e);
     }
     const merged: PluginSettings = {
-      ...DEFAULT_SETTINGS,
+      ...defaultSettings,
       ...(internalRaw as Partial<PluginSettings>),
       ...(snapshotRaw as Partial<PluginSettings>),
     };
@@ -182,19 +197,20 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     }
     if (!settings.folders || settings.folders.length === 0) {
       this.logger.warn('No folders configured');
-      new Notice('⚠️ No folders configured for publishing.');
+      new Notice('?? No folders configured for publishing.');
       return;
     }
 
     const vps = settings.vpsConfigs[0];
-    const vault = new ObsidianVaultAdapter(this.app, this.logger);
+    const scopedLogger = this.logger.child({ vps: vps.id ?? 'default' });
+    const vault = new ObsidianVaultAdapter(this.app, scopedLogger);
     const guidGenerator = new GuidGeneratorAdapter();
-    const notesUploader = new NotesUploaderAdapter(vps, this.responseHandler, this.logger);
+    const notesCollector = new CollectingUploader(scopedLogger);
     const publishNotesUsecase = new PublishToSiteUseCase(
       vault,
-      notesUploader,
+      notesCollector,
       guidGenerator,
-      this.logger
+      scopedLogger
     );
     const notesProgress = new NoticeProgressAdapter();
     const coreSettings = buildCoreSettings(settings);
@@ -202,80 +218,117 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     const result = await publishNotesUsecase.execute(coreSettings, notesProgress);
 
     if (result.type === 'noConfig') {
-      new Notice('⚠️ No folders or VPS configured.');
+      new Notice('?? No folders or VPS configured.');
       return;
     }
 
     if (result.type === 'missingVpsConfig') {
       this.logger.warn('Missing VPS for folders:', result.foldersWithoutVps);
-      new Notice('⚠️ Some folder(s) have no VPS configured (see console).');
+      new Notice('?? Some folder(s) have no VPS configured (see console).');
       return;
     }
 
     if (result.type === 'error') {
       this.logger.error('Error during publishing: ', result.error);
-      new Notice('❌ Error during publishing (see console).');
+      new Notice('? Error during publishing (see console).');
       return;
     }
 
-    const publishedNotesCount = result.publishedCount;
-    const notes: PublishableNote[] = result.notes ?? [];
-    if (publishedNotesCount === 0) {
-      new Notice('✅ Nothing to publish (0 note).');
+    const notes = notesCollector.notes ?? result.notes ?? [];
+    if (notes.length === 0) {
+      new Notice('?? Nothing to publish (0 note).');
       return;
     }
 
-    const notesWithAssets: NoteWithAssets[] = extractNotesWithAssets(notes);
-    if (notesWithAssets.length === 0) {
-      new Notice(`✅ Published ${publishedNotesCount} note(s). No assets to publish.`);
-      return;
-    }
+    const notesWithAssets = extractNotesWithAssets(notes);
+    const assetsPlanned = new Set(
+      notesWithAssets.flatMap((n) => n.assets?.map((a) => a.target) ?? [])
+    ).size;
 
-    const assetsVault = new ObsidianAssetsVaultAdapter(this.app, this.logger);
-    const assetsUploader = new AssetsUploaderAdapter(vps, this.responseHandler, this.logger);
-    const publishAssetsUsecase = new PublishAssetsToSiteUseCase(
-      assetsVault,
-      assetsUploader,
+    const sessionClient = new SessionApiClient(
+      vps.url,
+      vps.apiKey,
+      this.responseHandler,
       this.logger
     );
-    const assetsProgress = new NoticeProgressAdapter();
 
-    const assetsResult = await publishAssetsUsecase.execute({
-      notes: notesWithAssets,
-      assetsFolder: settings.assetsFolder,
-      enableAssetsVaultFallback: settings.enableAssetsVaultFallback,
-      progress: assetsProgress,
-    });
+    let sessionId = null;
+    const maxBytesRequested = 5 * 1024 * 1024;
+    let maxBytesPerRequest = maxBytesRequested;
+    let assetsUploaded = 0;
 
-    switch (assetsResult.type) {
-      case 'noAssets':
-        new Notice(`✅ Published ${publishedNotesCount} note(s). No assets to publish.`);
-        break;
-      case 'error':
-        this.logger.error('Error while publishing assets:', assetsResult.error);
-        new Notice(
-          `✅ Published ${publishedNotesCount} note(s), but assets publication failed (see console).`
+    try {
+      const started = await sessionClient.startSession({
+        notesPlanned: notes.length,
+        assetsPlanned: assetsPlanned,
+        maxBytesPerRequest: maxBytesRequested,
+      });
+      sessionId = started.sessionId;
+      maxBytesPerRequest = started.maxBytesPerRequest;
+      this.logger.info('Session started', { sessionId, maxBytesPerRequest });
+
+      const notesUploader = new NotesUploaderAdapter(
+        sessionClient,
+        sessionId,
+        this.logger,
+        maxBytesPerRequest
+      );
+      await notesUploader.upload(notes);
+
+      if (notesWithAssets.length > 0) {
+        const assetsVault = new ObsidianAssetsVaultAdapter(this.app, this.logger);
+        const assetsUploader = new AssetsUploaderAdapter(
+          sessionClient,
+          sessionId,
+          this.logger,
+          maxBytesPerRequest
         );
-        break;
-      case 'success': {
-        const { publishedAssetsCount, failures } = assetsResult;
-        if (failures.length > 0) {
-          this.logger.warn('Some assets failed to publish:', failures);
-          new Notice(
-            `✅ Published ${publishedNotesCount} note(s) and ${publishedAssetsCount} asset(s), with ${failures.length} asset failure(s) (see console).`
-          );
-        } else {
-          new Notice(
-            `✅ Published ${publishedNotesCount} note(s) and ${publishedAssetsCount} asset(s).`
-          );
+        const publishAssetsUsecase = new PublishAssetsToSiteUseCase(
+          assetsVault,
+          assetsUploader,
+          this.logger
+        );
+        const assetsProgress = new NoticeProgressAdapter();
+
+        const assetsResult = await publishAssetsUsecase.execute({
+          notes: notesWithAssets,
+          assetsFolder: settings.assetsFolder,
+          enableAssetsVaultFallback: settings.enableAssetsVaultFallback,
+          progress: assetsProgress,
+        });
+
+        if (assetsResult.type === 'error') {
+          throw assetsResult.error ?? new Error('Asset publication failed');
         }
-        break;
+        assetsUploaded =
+          assetsResult.type === 'success' ? assetsResult.publishedAssetsCount : 0;
+
+        if (assetsResult.type === 'success' && assetsResult.failures.length > 0) {
+          this.logger.warn('Some assets failed to upload', {
+            failures: assetsResult.failures,
+          });
+        }
       }
+
+      await sessionClient.finishSession(sessionId, {
+        notesProcessed: notes.length,
+        assetsProcessed: assetsUploaded,
+      });
+
+      new Notice('' + ('? Published ' + notes.length + ' note(s)' + (assetsPlanned ? ' and ' + assetsUploaded + ' asset(s)' : '') + '.'));
+    } catch (err) {
+      this.logger.error('Publishing failed, aborting session if created', err);
+      if (sessionId) {
+        try {
+          await sessionClient.abortSession(sessionId);
+        } catch (abortErr) {
+          this.logger.error('Failed to abort session', abortErr);
+        }
+      }
+      new Notice('? Publishing failed (see console).');
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // VPS Connection Test
+// VPS Connection Test
   // ---------------------------------------------------------------------------
   async testConnection(): Promise<void> {
     const { t } = getTranslations(this.app, this.settings);
