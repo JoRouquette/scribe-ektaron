@@ -1,6 +1,6 @@
-import { AssetRef } from '@core-domain/entities/AssetRef';
-import type { PublishableNote } from '@core-domain/entities/PublishableNote';
-import { ResolvedAssetFile } from '@core-domain/entities/ResolvedAssetFile';
+import { AssetRef } from '@core-domain/entities/asset-ref';
+import type { PublishableNote } from '@core-domain/entities/publishable-note';
+import { ResolvedAssetFile } from '@core-domain/entities/resolved-asset-file';
 import { AssetsVaultPort } from '@core-domain/ports/assets-vault-port';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
 import { App, TFile } from 'obsidian';

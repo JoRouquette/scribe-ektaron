@@ -1,5 +1,5 @@
-import type { PublishableNote } from '../entities/PublishableNote';
-import type { SanitizationRules } from '../entities/SanitizationRules';
+import type { PublishableNote } from '../entities/publishable-note';
+import type { SanitizationRules } from '../entities/sanitization-rules';
 
 export interface ContentSanitizerPort {
   sanitizeNote(

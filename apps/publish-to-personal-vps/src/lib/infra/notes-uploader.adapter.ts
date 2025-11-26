@@ -1,5 +1,5 @@
 import { DomainFrontmatter, FolderConfig } from '@core-domain/entities';
-import type { PublishableNote } from '@core-domain/entities/PublishableNote';
+import type { PublishableNote } from '@core-domain/entities/publishable-note';
 import type { UploaderPort } from '@core-domain/ports/uploader-port';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
 import { batchByBytes } from '../utils/batch-by-bytes.util';

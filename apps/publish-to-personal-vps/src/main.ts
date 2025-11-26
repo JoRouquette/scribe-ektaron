@@ -1,6 +1,6 @@
 import { Notice, Plugin, RequestUrlResponse } from 'obsidian';
 
-import type { PublishPluginSettings } from '@core-domain/entities/PublishPluginSettings';
+import type { PublishPluginSettings } from '@core-domain/entities/publish-plugin-settings';
 import type { I18nSettings } from './i18n';
 import { getTranslations } from './i18n';
 
@@ -8,14 +8,14 @@ import { decryptApiKey, encryptApiKey } from './lib/api-key-crypto';
 import { testVpsConnection } from './lib/services/http-connection.service';
 import { PublishToPersonalVpsSettingTab } from './lib/setting-tab.view';
 
-import { PublishToSiteUseCase } from '@core-application/publish/usecases/publish-notes-to-site.usecase';
-import { extractNotesWithAssets, type NoteWithAssets } from '@core-domain/entities/NoteWithAssets';
-import type { PublishableNote } from '@core-domain/entities/PublishableNote';
-import { PublishAssetsToSiteUseCase } from '@core-application/publish/usecases/publish-assets-to-site.usecase';
+import { PublishNotesCommandHandler } from '@core-application/vault-parsing/commands/publish-notes.command';
+import { extractNotesWithAssets, type NoteWithAssets } from '@core-domain/entities/note-with-assets';
+import type { PublishableNote } from '@core-domain/entities/publishable-note';
+import { PublishAssetsCommandHandler } from '@core-application/vault-parsing/commands/publish-assets.command';
 import { ObsidianAssetsVaultAdapter } from './lib/infra/obsidian-assets-vault.adapter';
 
-import { HttpResponse } from '@core-domain/entities/HttpResponse';
-import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
+import { HttpResponse } from '@core-domain/entities/http-response';
+import { HttpResponseHandler } from '@core-application/vault-parsing/handler/http-response.handler';
 import { AssetsUploaderAdapter } from './lib/infra/assets-uploader.adapter';
 import { ConsoleLoggerAdapter } from './lib/infra/console-logger.adapter';
 import { NotesUploaderAdapter } from './lib/infra/notes-uploader.adapter';
@@ -206,7 +206,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     const vault = new ObsidianVaultAdapter(this.app, scopedLogger);
     const guidGenerator = new GuidGeneratorAdapter();
     const notesCollector = new CollectingUploader(scopedLogger);
-    const publishNotesUsecase = new PublishToSiteUseCase(
+    const publishNotesHandler = new PublishNotesCommandHandler(
       vault,
       notesCollector,
       guidGenerator,
@@ -215,7 +215,10 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
     const notesProgress = new NoticeProgressAdapter();
     const coreSettings = buildCoreSettings(settings);
 
-    const result = await publishNotesUsecase.execute(coreSettings, notesProgress);
+    const result = await publishNotesHandler.execute({
+      settings: coreSettings,
+      progress: notesProgress,
+    });
 
     if (result.type === 'noConfig') {
       new Notice('?? No folders or VPS configured.');
@@ -283,7 +286,7 @@ export default class PublishToPersonalVpsPlugin extends Plugin {
           this.logger,
           maxBytesPerRequest
         );
-        const publishAssetsUsecase = new PublishAssetsToSiteUseCase(
+        const publishAssetsUsecase = new PublishAssetsCommandHandler(
           assetsVault,
           assetsUploader,
           this.logger

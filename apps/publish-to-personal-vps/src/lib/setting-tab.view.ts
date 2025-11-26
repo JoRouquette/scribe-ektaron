@@ -1,5 +1,5 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
-import type { VpsConfig } from '@core-domain/entities/VpsConfig';
+import type { VpsConfig } from '@core-domain/entities/vps-config';
 import { getTranslations } from '../i18n';
 import PublishToPersonalVpsPlugin from '../main';
 import { createDefaultFolderConfig } from './utils/create-default-folder-config.util';

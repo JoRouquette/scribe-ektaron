@@ -1,6 +1,6 @@
 import { requestUrl, RequestUrlResponse } from 'obsidian';
-import { HttpResponseHandler } from '@core-application/publish/handler/http-response.handler';
-import { HttpResponse } from '@core-domain/entities/HttpResponse';
+import { HttpResponseHandler } from '@core-application/vault-parsing/handler/http-response.handler';
+import { HttpResponse } from '@core-domain/entities/http-response';
 import { LoggerPort } from '@core-domain/ports/logger-port';
 
 export interface StartSessionResponse {

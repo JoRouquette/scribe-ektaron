@@ -1,6 +1,6 @@
-import type { CollectedNote } from '@core-domain/entities/CollectedNote';
+import type { CollectedNote } from '@core-domain/entities/collected-note';
 import { App, TAbstractFile, TFile, TFolder } from 'obsidian';
-import type { FolderConfig } from '@core-domain/entities/FolderConfig';
+import type { FolderConfig } from '@core-domain/entities/folder-config';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
 import type { VaultPort } from '@core-domain/ports/vault-port';
 

@@ -1,6 +1,6 @@
-import type { PublishableNote } from '../entities/PublishableNote';
-import type { AssetRef } from '../entities/AssetRef';
-import { ResolvedAssetFile } from '../entities/ResolvedAssetFile';
+import type { PublishableNote } from '../entities/publishable-note';
+import type { AssetRef } from '../entities/asset-ref';
+import { ResolvedAssetFile } from '../entities/resolved-asset-file';
 
 export interface AssetsVaultPort {
   resolveAssetForNote(

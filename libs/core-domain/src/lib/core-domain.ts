@@ -1,4 +1,4 @@
 export * from './entities';
 export * from './ports';
 export * from './utils';
-export * from './errors/SessionError';
+export * from './errors/session-error';

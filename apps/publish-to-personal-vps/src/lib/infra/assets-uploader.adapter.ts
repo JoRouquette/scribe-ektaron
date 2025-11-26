@@ -1,5 +1,5 @@
 import { UploaderPort } from '@core-domain/ports/uploader-port';
-import type { ResolvedAssetFile } from '@core-domain/entities/ResolvedAssetFile';
+import type { ResolvedAssetFile } from '@core-domain/entities/resolved-asset-file';
 import type { LoggerPort } from '@core-domain/ports/logger-port';
 import { SessionApiClient } from '../services/session-api.client';
 import { batchByBytes } from '../utils/batch-by-bytes.util';
