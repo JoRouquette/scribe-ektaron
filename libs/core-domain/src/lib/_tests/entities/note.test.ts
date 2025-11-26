@@ -14,9 +14,9 @@ import {
 } from '@core-domain';
 
 describe('Note Entities', () => {
-  const baseFrontmatter: DomainFrontmatter = {
-    flat: { foo: 'bar' },
-    nested: { baz: { qux: 1 } },
+  const baseFrontmatter: any = {
+    'Foo.Bar': 'baz',
+    baz: { qux: 1 },
     tags: ['test', 'note'],
   };
 
@@ -25,7 +25,7 @@ describe('Note Entities', () => {
     vaultFolder: 'notes',
     routeBase: '/notes',
     vpsId: 'vps1',
-    sanitization: { removeFencedCodeBlocks: true },
+    sanitization: [{ name: 'Remove fenced code blocks', regex: '```[\\s\\S]*?```', replacement: '', isEnabled: true }],
   };
 
   const vpsConfig: VpsConfig = {
@@ -66,7 +66,6 @@ describe('Note Entities', () => {
   };
 
   const routing: NoteRoutingInfo = {
-    id: 'note1',
     slug: 'note-1',
     path: '/notes/note-1',
     routeBase: '/notes',
@@ -89,14 +88,14 @@ describe('Note Entities', () => {
     publishedAt: new Date('2024-01-01T00:00:00Z'),
     routing,
     assets: [assetRef],
-    wikilinks: [wikilinkRef],
     resolvedWikilinks: [resolvedWikilink],
+    eligibility: { isPublishable: true },
   };
 
   it('should create a valid NoteCore object', () => {
     expect(noteCore.noteId).toBe('note1');
     expect(noteCore.frontmatter.tags).toContain('test');
-    expect(noteCore.folderConfig.sanitization?.removeFencedCodeBlocks).toBe(true);
+    expect(noteCore.folderConfig.sanitization?.[0].isEnabled).toBe(true);
     expect(noteCore.vpsConfig.url).toBe('https://example.com');
   });
 
@@ -104,7 +103,6 @@ describe('Note Entities', () => {
     expect(publishableNote.publishedAt).toBeInstanceOf(Date);
     expect(publishableNote.routing.slug).toBe('note-1');
     expect(publishableNote.assets?.[0].kind).toBe('image');
-    expect(publishableNote.wikilinks?.[0].alias).toBe('AliasA');
     expect(publishableNote.resolvedWikilinks?.[0].isResolved).toBe(true);
   });
 

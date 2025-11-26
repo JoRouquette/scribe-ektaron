@@ -53,12 +53,66 @@ describe('DTO validation', () => {
           title: 'T',
           content: 'c',
           publishedAt: new Date().toISOString(),
-          routing: { id: '1', fullPath: '/t', slug: 't', path: '/t', routeBase: '/t' },
+          routing: { fullPath: '/t', slug: 't', path: '/t', routeBase: '/t' },
+          eligibility: { isPublishable: true },
+          vaultPath: 'v',
+          relativePath: 'r',
+          frontmatter: { tags: [], flat: {}, nested: {} },
+          folderConfig: {
+            id: 'f',
+            vaultFolder: 'v',
+            routeBase: '/t',
+            vpsId: 'vps',
+            sanitization: [],
+          },
+          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', apiKey: 'k' },
+        },
+      ],
+    });
+    expect(parsed.success).toBe(true);
+  });
+
+  it('rejects UploadSessionNotesBodyDto without eligibility', () => {
+    const parsed = UploadSessionNotesBodyDto.safeParse({
+      notes: [
+        {
+          noteId: '1',
+          title: 'T',
+          content: 'c',
+          publishedAt: new Date().toISOString(),
+          routing: { fullPath: '/t', slug: 't', path: '/t', routeBase: '/t' },
           vaultPath: 'v',
           relativePath: 'r',
           frontmatter: { tags: [], flat: {}, nested: {} },
           folderConfig: { id: 'f', vaultFolder: 'v', routeBase: '/t', vpsId: 'vps' },
-          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', api-key: 'k' },
+          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', apiKey: 'k' },
+        },
+      ],
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it('validates sanitization rules shape', () => {
+    const parsed = UploadSessionNotesBodyDto.safeParse({
+      notes: [
+        {
+          noteId: '1',
+          title: 'T',
+          content: 'c',
+          publishedAt: new Date().toISOString(),
+          routing: { fullPath: '/t', slug: 't', path: '/t', routeBase: '/t' },
+          eligibility: { isPublishable: true },
+          vaultPath: 'v',
+          relativePath: 'r',
+          frontmatter: { tags: [], flat: {}, nested: {} },
+          folderConfig: {
+            id: 'f',
+            vaultFolder: 'v',
+            routeBase: '/t',
+            vpsId: 'vps',
+            sanitization: [{ name: 'rule', regex: 'foo', replacement: '', isEnabled: true }],
+          },
+          vpsConfig: { id: 'vps', name: 'vps', url: 'http://x', apiKey: 'k' },
         },
       ],
     });
