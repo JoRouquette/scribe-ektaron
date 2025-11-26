@@ -1,4 +1,4 @@
-import { batchByBytes, jsonSizeBytes } from './batch-by-bytes.util';
+import { batchByBytes, jsonSizeBytes } from '../lib/utils/batch-by-bytes.util';
 
 describe('batchByBytes', () => {
   it('batches items without exceeding limit', () => {
