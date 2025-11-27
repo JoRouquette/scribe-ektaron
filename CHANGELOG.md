@@ -1,3 +1,36 @@
+## 3.0.0 (2025-11-27)
+
+* Merge branch 'feat/ajout-plugin-in-workspace' into release ([19b076b](https://github.com/JoRouquette/scribe-ektaron/commit/19b076b))
+* Merge branch 'fix/packaging' into release ([82c4595](https://github.com/JoRouquette/scribe-ektaron/commit/82c4595))
+* Merge branch 'release' ([b11425f](https://github.com/JoRouquette/scribe-ektaron/commit/b11425f))
+* Merge branch 'release' ([5e863db](https://github.com/JoRouquette/scribe-ektaron/commit/5e863db))
+* refactor!: migrate folder sanitization to array of rules, update content sanitizer ([d7cd502](https://github.com/JoRouquette/scribe-ektaron/commit/d7cd502))
+* refactor(core,plugin): modularize note parsing pipeline and settings UI ([c6fa555](https://github.com/JoRouquette/scribe-ektaron/commit/c6fa555))
+* refactor(site,core): move catalog queries and manifest types to core libs ([ce7fa88](https://github.com/JoRouquette/scribe-ektaron/commit/ce7fa88))
+* test: add Jest config and test setup ([ef66dab](https://github.com/JoRouquette/scribe-ektaron/commit/ef66dab))
+* test(core-application): add vault-parsing pipeline tests and update test fixtures ([972dcc0](https://github.com/JoRouquette/scribe-ektaron/commit/972dcc0))
+* test(publish-to-personal-vps): migrate tests to .test.ts, add missing coverage ([ce2d360](https://github.com/JoRouquette/scribe-ektaron/commit/ce2d360))
+* refactor: migrate plugin to standalone TypeScript and improve test coverage ([36873e3](https://github.com/JoRouquette/scribe-ektaron/commit/36873e3))
+* refactor: migrate to kebab-case file naming for consistency ([6f69787](https://github.com/JoRouquette/scribe-ektaron/commit/6f69787))
+* refactor: move publish entities and ports to dedicated folders ([f742735](https://github.com/JoRouquette/scribe-ektaron/commit/f742735))
+* refactor: normalize plugin naming and session flow ([cc5146b](https://github.com/JoRouquette/scribe-ektaron/commit/cc5146b))
+* refactor: plugin software architecture ([249648a](https://github.com/JoRouquette/scribe-ektaron/commit/249648a))
+* refactor: remove vpsConfig from note and related tests, update slug to use Slug value object ([48e92b0](https://github.com/JoRouquette/scribe-ektaron/commit/48e92b0))
+* refactor(core): migrate to kebab-case file naming for all entities, ports, and usecases ([4de1e7e](https://github.com/JoRouquette/scribe-ektaron/commit/4de1e7e))
+* feat(settings): add default sanitization rule banner and disable editing for default rule ([1b4c48c](https://github.com/JoRouquette/scribe-ektaron/commit/1b4c48c))
+* fix(packaging): update script paths for correct workspace and app root resolution ([fe32b34](https://github.com/JoRouquette/scribe-ektaron/commit/fe32b34))
+* chore: add plugin to nx monorepo ([64b6ff3](https://github.com/JoRouquette/scribe-ektaron/commit/64b6ff3))
+* chore: correction pipeline ([f58a6da](https://github.com/JoRouquette/scribe-ektaron/commit/f58a6da))
+* chore: correction pipeline ([103ea8e](https://github.com/JoRouquette/scribe-ektaron/commit/103ea8e))
+* chore: update gitignore ([31e7f08](https://github.com/JoRouquette/scribe-ektaron/commit/31e7f08))
+* ci: enforce lint and tests on merge ([0c89653](https://github.com/JoRouquette/scribe-ektaron/commit/0c89653))
+
+
+### BREAKING CHANGE
+
+* FolderConfig.sanitization is now an array of rules (SanitizationRules[]), not
+a single object.
+
 ## 2.0.0 (2025-11-25)
 
 * fix(routes,uploads): correct asset upload param, improve route building logs, update file storage ([5a79d64](https://github.com/JoRouquette/scribe-ektaron/commit/5a79d64))
