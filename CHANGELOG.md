@@ -1,3 +1,16 @@
+## <small>3.0.1 (2025-11-27)</small>
+
+* Merge branch 'fix/actions' into release ([63d7d21](https://github.com/JoRouquette/scribe-ektaron/commit/63d7d21))
+* Merge branch 'fix/release-pipeline' into release ([d545e0e](https://github.com/JoRouquette/scribe-ektaron/commit/d545e0e))
+* Merge branch 'fix/test' into release ([8592bfe](https://github.com/JoRouquette/scribe-ektaron/commit/8592bfe))
+* Merge branch 'release' ([0eb276e](https://github.com/JoRouquette/scribe-ektaron/commit/0eb276e))
+* Merge branch 'release' ([2130c7e](https://github.com/JoRouquette/scribe-ektaron/commit/2130c7e))
+* fix(ci): ensure plugin build exists before packaging in release pipeline ([a80521a](https://github.com/JoRouquette/scribe-ektaron/commit/a80521a))
+* test(site-index-templates): use Slug.from for slug in renderFolderIndex test ([f423ab0](https://github.com/JoRouquette/scribe-ektaron/commit/f423ab0))
+* test(site-index-templates): use Slug.from for slug in renderFolderIndex test ([e2cdc26](https://github.com/JoRouquette/scribe-ektaron/commit/e2cdc26))
+* chore(ci): refactor and rename GitHub Actions workflows ([6fd1c19](https://github.com/JoRouquette/scribe-ektaron/commit/6fd1c19))
+* chore(ci): unify and refactor GitHub Actions workflows ([849ad65](https://github.com/JoRouquette/scribe-ektaron/commit/849ad65))
+
 ## 3.0.0 (2025-11-27)
 
 * Merge branch 'feat/ajout-plugin-in-workspace' into release ([19b076b](https://github.com/JoRouquette/scribe-ektaron/commit/19b076b))

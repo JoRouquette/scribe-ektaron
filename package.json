@@ -1,6 +1,6 @@
 {
   "name": "scribe-ektaron",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "scripts": {
     "prepare": "husky",
     "start node": "nx serve node",
