@@ -31,7 +31,10 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Build & package plugin
+      - name: Build plugin
+        run: npx nx run publish-to-personal-vps:build
+
+      - name: Package plugin
         run: npx nx run publish-to-personal-vps:package
 
       - name: Release
