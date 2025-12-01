@@ -56,11 +56,13 @@ export class ShellComponent implements OnInit {
 
   private _crumbs: Crumb[] = [];
   crumbs = () => this._crumbs;
+  private readonly pageTitleCache = new Map<string, string>();
 
   ngOnInit() {
     this.theme.init();
     this.config.ensure().then(() => {
       this.catalog.ensureManifest().then(() => {
+        this.hydrateManifestCache();
         this.router.events
           .pipe(
             filter((e) => e instanceof NavigationEnd),
@@ -89,16 +91,33 @@ export class ShellComponent implements OnInit {
     const parts = url.replace(/^\/+/, '').split('/').filter(Boolean);
 
     this._crumbs = parts.map((seg, i) => ({
-      label: decodeURIComponent(seg),
-      url: '/' + parts.slice(0, i + 1).join('/'),
+      url: this.normalizeRoute('/' + parts.slice(0, i + 1).join('/')),
+      label: this.getPageTitle('/' + parts.slice(0, i + 1).join('/')) ?? decodeURIComponent(seg),
     }));
 
+    this.currentTitle =
+      this.getPageTitle(url) ?? decodeURIComponent(parts.at(-1) || '');
+  }
+
+  private normalizeRoute(route: string): string {
+    const normalized = route.replace(/\/+$/, '') || '/';
+    return normalized.startsWith('/') ? normalized : '/' + normalized;
+  }
+
+  private hydrateManifestCache(): void {
+    this.pageTitleCache.clear();
     const manifest = this.catalog.manifest?.();
-    if (manifest?.pages?.length) {
-      const page = manifest.pages.find((p) => p.route === url);
-      this.currentTitle = page?.title ?? decodeURIComponent(parts.at(-1) || '');
-    } else {
-      this.currentTitle = decodeURIComponent(parts.at(-1) || '');
+    manifest?.pages?.forEach((p) => {
+      const key = this.normalizeRoute(p.route);
+      this.pageTitleCache.set(key, p.title);
+    });
+  }
+
+  private getPageTitle(route: string): string | undefined {
+    if (this.pageTitleCache.size === 0) {
+      this.hydrateManifestCache();
     }
+    const normalized = this.normalizeRoute(route);
+    return this.pageTitleCache.get(normalized);
   }
 }

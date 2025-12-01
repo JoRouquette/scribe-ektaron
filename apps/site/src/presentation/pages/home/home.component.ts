@@ -19,7 +19,6 @@ import { CatalogFacade } from '../../../application/facades/catalog-facade';
 import { ManifestPage } from '@core-domain/entities/manifest-page';
 import { CONTENT_REPOSITORY } from '../../../domain/ports/tokens';
 import { HttpContentRepository } from '../../../infrastructure/http/http-content.repository';
-import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 
 type Section = {
   key: string;
@@ -31,13 +30,7 @@ type Section = {
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [
-    MatDividerModule,
-    MatCardModule,
-    MatListModule,
-    MatButtonModule,
-    SearchBarComponent,
-  ],
+  imports: [MatDividerModule, MatCardModule, MatListModule, MatButtonModule],
   templateUrl: `./home.component.html`,
   styleUrls: [`./home.component.scss`],
   encapsulation: ViewEncapsulation.None,
@@ -61,10 +54,6 @@ export class HomeComponent implements OnInit {
       .catch(() =>
         this.rootIndexHtml.set(this.sanitizer.bypassSecurityTrustHtml('<p>Index introuvable.</p>'))
       );
-  }
-
-  onQueryInput(value: string) {
-    this.catalog.query.set(value ?? '');
   }
 
   sections = computed<Section[]>(() => {

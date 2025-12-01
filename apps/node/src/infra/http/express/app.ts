@@ -48,7 +48,7 @@ export function createApp(rootLogger?: LoggerPort) {
     allowedOrigins: EnvConfig.allowedOrigins(),
   });
 
-  const markdownRenderer = new MarkdownItRenderer();
+  const markdownRenderer = new MarkdownItRenderer(rootLogger);
   const stagingManager = new StagingManager(
     EnvConfig.contentRoot(),
     EnvConfig.assetsRoot(),

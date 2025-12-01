@@ -48,10 +48,6 @@ export class ViewerComponent implements OnDestroy {
             if (p) {
               this.title.set(this.capitalize(p.title) ?? '');
             }
-          } else {
-            const parts = normalized.split('/').filter(Boolean);
-            const last = parts.at(-1);
-            this.title.set(last ? this.capitalize(decodeURIComponent(last)) : '');
           }
 
           return this.contentRepository.fetch(htmlUrl);
