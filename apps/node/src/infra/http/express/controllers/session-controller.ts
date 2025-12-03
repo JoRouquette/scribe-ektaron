@@ -12,6 +12,7 @@ import {
   UploadNotesHandler,
 } from '@core-application';
 import { SessionInvalidError, SessionNotFoundError } from '@core-domain';
+import { CalloutRendererService } from '../../../markdown/callout-renderer.service';
 
 import { BYTES_LIMIT } from '../app';
 import { StagingManager } from '../../../filesystem/staging-manager';
@@ -27,6 +28,7 @@ export function createSessionController(
   notePublicationHandler: UploadNotesHandler,
   assetPublicationHandler: UploadAssetsHandler,
   stagingManager: StagingManager,
+  calloutRenderer: CalloutRendererService,
   logger?: LoggerPort
 ): Router {
   const router = Router();
@@ -43,7 +45,7 @@ export function createSessionController(
     }
 
     // Ensure required fields are present for CreateSessionCommand
-    const { notesPlanned, assetsPlanned, batchConfig } = parsed.data;
+    const { notesPlanned, assetsPlanned, batchConfig, calloutStyles } = parsed.data;
     if (typeof notesPlanned !== 'number' || typeof assetsPlanned !== 'number') {
       routeLogger?.warn('Missing required fields for session creation', {
         notesPlanned,
@@ -63,6 +65,13 @@ export function createSessionController(
     };
 
     try {
+      if (calloutStyles?.length) {
+        calloutRenderer.extendFromStyles(calloutStyles);
+        routeLogger?.info('Custom callout styles registered', {
+          count: calloutStyles.length,
+        });
+      }
+
       const result = await createSessionHandler.handle(command);
       routeLogger?.info('Session created', { sessionId: result.sessionId });
 

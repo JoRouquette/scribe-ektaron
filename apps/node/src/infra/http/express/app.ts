@@ -17,6 +17,7 @@ import { ManifestFileSystem } from '../../filesystem/manifest-file-system';
 import { NotesFileSystemStorage } from '../../filesystem/notes-file-system.storage';
 import { StagingManager } from '../../filesystem/staging-manager';
 import { UuidIdGenerator } from '../../id/uuid-id.generator';
+import { CalloutRendererService } from '../../markdown/callout-renderer.service';
 import { MarkdownItRenderer } from '../../markdown/markdown-it.renderer';
 
 import { createHealthCheckController } from './controllers/health-check.controller';
@@ -48,7 +49,8 @@ export function createApp(rootLogger?: LoggerPort) {
     allowedOrigins: EnvConfig.allowedOrigins(),
   });
 
-  const markdownRenderer = new MarkdownItRenderer(rootLogger);
+  const calloutRenderer = new CalloutRendererService();
+  const markdownRenderer = new MarkdownItRenderer(calloutRenderer, rootLogger);
   const stagingManager = new StagingManager(
     EnvConfig.contentRoot(),
     EnvConfig.assetsRoot(),
@@ -87,6 +89,7 @@ export function createApp(rootLogger?: LoggerPort) {
       uploadNotesHandler,
       uploadAssetsHandler,
       stagingManager,
+      calloutRenderer,
       rootLogger
     )
   );

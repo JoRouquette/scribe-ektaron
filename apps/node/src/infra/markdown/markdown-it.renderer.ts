@@ -5,9 +5,10 @@ import { CalloutRendererService } from './callout-renderer.service';
 
 export class MarkdownItRenderer implements MarkdownRendererPort {
   private readonly md: MarkdownIt;
-  private readonly calloutRenderer = new CalloutRendererService();
+  private readonly calloutRenderer: CalloutRendererService;
 
-  constructor(private readonly logger?: LoggerPort) {
+  constructor(calloutRenderer?: CalloutRendererService, private readonly logger?: LoggerPort) {
+    this.calloutRenderer = calloutRenderer ?? new CalloutRendererService();
     this.md = new MarkdownIt({
       html: true,
       linkify: true,
@@ -26,13 +27,15 @@ export class MarkdownItRenderer implements MarkdownRendererPort {
     const withAssets = this.injectAssets(note.content, contentAssets);
     const withLinks = this.injectWikilinks(withAssets, contentLinks);
     const html = this.md.render(withLinks);
+    const userCss = this.calloutRenderer.getUserCss();
+    const withStyles = userCss ? `<style data-callout-styles>${userCss}</style>\n${html}` : html;
 
     this.logger?.info('Markdown rendered to HTML', {
       noteId: note.noteId,
       slug: note.routing.slug,
     });
-    this.logger?.debug('Rendered HTML content', html);
-    return html;
+    this.logger?.debug('Rendered HTML content', withStyles);
+    return withStyles;
   }
 
   private injectAssets(content: string, assets: AssetRef[]): string {

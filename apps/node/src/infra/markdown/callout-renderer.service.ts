@@ -1,8 +1,8 @@
 import MarkdownIt, { type Token } from 'markdown-it';
 
-type CalloutFold = 'open' | 'closed';
+export type CalloutFold = 'open' | 'closed';
 
-interface CalloutMeta {
+export interface CalloutMeta {
   type: string;
   label: string;
   icon: string;
@@ -12,14 +12,19 @@ interface CalloutMeta {
   inlineBodyHtml?: string;
 }
 
-interface CalloutDefinition {
+export interface CalloutDefinition {
   type: string;
   label: string;
   icon: string;
   aliases?: string[];
 }
 
-const CALLOUT_DEFINITIONS: CalloutDefinition[] = [
+export interface CalloutStylePayload {
+  path: string;
+  css: string;
+}
+
+const BASE_DEFINITIONS: CalloutDefinition[] = [
   { type: 'note', label: 'Note', icon: 'N' },
   { type: 'abstract', label: 'Abstract', icon: 'A', aliases: ['summary', 'tldr'] },
   { type: 'info', label: 'Info', icon: 'I' },
@@ -35,18 +40,47 @@ const CALLOUT_DEFINITIONS: CalloutDefinition[] = [
   { type: 'quote', label: 'Quote', icon: '"', aliases: ['cite'] },
 ];
 
-const CALLOUT_LOOKUP: Record<string, CalloutDefinition> = (() => {
-  const map: Record<string, CalloutDefinition> = {};
-  for (const def of CALLOUT_DEFINITIONS) {
-    map[def.type] = def;
-    for (const alias of def.aliases ?? []) {
-      map[alias] = def;
-    }
-  }
-  return map;
-})();
-
 export class CalloutRendererService {
+  private definitions: CalloutDefinition[] = [...BASE_DEFINITIONS];
+  private lookup: Record<string, CalloutDefinition> = this.buildLookup(this.definitions);
+  private userCss = '';
+
+  getUserCss(): string {
+    return this.userCss;
+  }
+
+  extendDefinitions(defs: CalloutDefinition[]): void {
+    for (const def of defs) {
+      const type = this.sanitizeCalloutType(def.type);
+      const existing = this.lookup[type];
+      if (existing) {
+        existing.icon = def.icon || existing.icon;
+        existing.label = def.label || existing.label;
+        existing.aliases = Array.from(
+          new Set([...(existing.aliases ?? []), ...(def.aliases ?? [])].map(this.sanitizeCalloutType))
+        );
+      } else {
+        const normalized: CalloutDefinition = {
+          type,
+          label: def.label || this.capitalize(type),
+          icon: def.icon || type.charAt(0).toUpperCase(),
+          aliases: (def.aliases ?? []).map(this.sanitizeCalloutType),
+        };
+        this.definitions.push(normalized);
+      }
+    }
+    this.lookup = this.buildLookup(this.definitions);
+  }
+
+  extendFromStyles(styles: CalloutStylePayload[]): CalloutDefinition[] {
+    const defs = styles.flatMap((s) => this.extractDefinitionsFromCss(s.css));
+    if (defs.length > 0) {
+      this.extendDefinitions(defs);
+    }
+    this.userCss = styles.length > 0 ? styles.map((s) => s.css).join('\n\n') : '';
+    return defs;
+  }
+
   register(md: MarkdownIt): void {
     const defaultOpen =
       md.renderer.rules.blockquote_open ??
@@ -213,7 +247,7 @@ ${bodyHtml}
     if (!match) return null;
 
     const rawType = this.sanitizeCalloutType(match[1]);
-    return CALLOUT_LOOKUP[rawType] ?? {
+    return this.lookup[rawType] ?? {
       type: rawType,
       label: this.capitalize(rawType),
       icon: rawType.charAt(0).toUpperCase(),
@@ -225,7 +259,7 @@ ${bodyHtml}
     if (!match) return null;
 
     const [, rawType, foldSymbol, titlePart] = match;
-    const typeInfo = CALLOUT_LOOKUP[this.sanitizeCalloutType(rawType)] ?? def;
+    const typeInfo = this.lookup[this.sanitizeCalloutType(rawType)] ?? def;
     const isFoldable = foldSymbol === '+' || foldSymbol === '-';
     const fold: CalloutFold | null = isFoldable
       ? foldSymbol === '-'
@@ -254,14 +288,58 @@ ${bodyHtml}
     return body.startsWith('\n') ? body.slice(1) : body;
   }
 
-  private sanitizeCalloutType(raw: string): string {
+  private sanitizeCalloutType = (raw: string): string => {
     const normalized = raw.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/-+/g, '-');
     const trimmed = normalized.replace(/^-+|-+$/g, '');
     return trimmed || 'note';
-  }
+  };
 
   private capitalize(input: string): string {
     if (!input) return '';
     return input.charAt(0).toUpperCase() + input.slice(1);
+  }
+
+  private buildLookup(defs: CalloutDefinition[]): Record<string, CalloutDefinition> {
+    const map: Record<string, CalloutDefinition> = {};
+    for (const def of defs) {
+      map[def.type] = def;
+      for (const alias of def.aliases ?? []) {
+        map[alias] = def;
+      }
+    }
+    return map;
+  }
+
+  private extractDefinitionsFromCss(css: string): CalloutDefinition[] {
+    const defs: CalloutDefinition[] = [];
+    if (!css) return defs;
+    const ruleRegex = /\.callout\[data-callout[^{]+\{[^}]*\}/gms;
+    const iconRegex = /--callout-icon\s*:\s*([^;]+);?/i;
+
+    let match: RegExpExecArray | null;
+    while ((match = ruleRegex.exec(css)) !== null) {
+      const rule = match[0];
+      const selectorPart = rule.slice(0, rule.indexOf('{'));
+      const body = rule.slice(rule.indexOf('{') + 1, rule.lastIndexOf('}'));
+
+      const names = Array.from(
+        selectorPart.matchAll(/data-callout=['"]?([^'"\]]+)['"]?/gi),
+        (m) => this.sanitizeCalloutType(m[1])
+      );
+      if (names.length === 0) continue;
+
+      const [primary, ...aliases] = names;
+      const iconMatch = body.match(iconRegex);
+      const icon = iconMatch ? iconMatch[1].trim() : primary.charAt(0).toUpperCase();
+
+      defs.push({
+        type: primary,
+        icon,
+        label: this.capitalize(primary),
+        aliases,
+      });
+    }
+
+    return defs;
   }
 }

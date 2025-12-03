@@ -21,6 +21,9 @@ describe('sessionController', () => {
   const uploadAssetsHandler = {
     handle: jest.fn().mockResolvedValue({ sessionId: 's1', published: 0, errors: [] }),
   };
+  const calloutRenderer = {
+    extendFromStyles: jest.fn(),
+  };
   const stagingManager = {
     promoteSession: jest.fn().mockResolvedValue(undefined),
     discardSession: jest.fn().mockResolvedValue(undefined),
@@ -36,7 +39,8 @@ describe('sessionController', () => {
         abortSessionHandler as any,
         uploadNotesHandler as any,
         uploadAssetsHandler as any,
-        stagingManager as any
+        stagingManager as any,
+        calloutRenderer as any
       )
     );
     return app;
