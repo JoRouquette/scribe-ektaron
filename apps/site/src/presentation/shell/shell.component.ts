@@ -1,16 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import { Component, DestroyRef, OnInit, Type } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-
 import { CatalogFacade } from '../../application/facades/catalog-facade';
 import { ConfigFacade } from '../../application/facades/config-facade';
-import { VaultExplorerComponent } from '../components/vault-explorer/vault-explorer.component';
 import { LogoComponent } from '../pages/logo/logo.component';
 import { TopbarComponent } from '../pages/topbar/topbar.component';
 import { ThemeService } from '../services/theme.service';
@@ -25,13 +20,7 @@ type Crumb = { label: string; url: string };
   imports: [
     CommonModule,
     RouterOutlet,
-    // Material utilitaires (le topbar utilise son propre MatToolbar)
-    MatDividerModule,
-    MatIconModule,
-    MatButtonModule,
-
     // Feature components
-    VaultExplorerComponent,
     TopbarComponent,
     LogoComponent,
   ],
@@ -60,11 +49,13 @@ export class ShellComponent implements OnInit {
   crumbs = () => this._crumbs;
   private readonly pageTitleCache = new Map<string, string>();
   private readonly pageByRoute = new Map<string, ManifestPage>();
+  vaultExplorerComponent: Type<unknown> | null = null;
 
   ngOnInit() {
     this.theme.init();
     this.config.ensure().then(() => {
       this.catalog.ensureManifest().then(() => {
+        this.loadVaultExplorer();
         this.hydrateManifestCache();
         this.router.events
           .pipe(
@@ -148,5 +139,11 @@ export class ShellComponent implements OnInit {
     }
 
     return undefined;
+  }
+
+  private async loadVaultExplorer(): Promise<void> {
+    if (this.vaultExplorerComponent) return;
+    const mod = await import('../components/vault-explorer/vault-explorer.component');
+    this.vaultExplorerComponent = mod.VaultExplorerComponent;
   }
 }

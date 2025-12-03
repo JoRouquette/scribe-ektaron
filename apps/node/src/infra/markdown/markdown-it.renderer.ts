@@ -14,8 +14,13 @@ export class MarkdownItRenderer implements MarkdownRendererPort {
   }
 
   async render(note: PublishableNote): Promise<string> {
-    const withAssets = this.injectAssets(note.content, note.assets ?? []);
-    const withLinks = this.injectWikilinks(withAssets, note.resolvedWikilinks ?? []);
+    const contentAssets = (note.assets ?? []).filter((a) => a.origin !== 'frontmatter');
+    const contentLinks = (note.resolvedWikilinks ?? []).filter(
+      (l) => l.origin !== 'frontmatter'
+    );
+
+    const withAssets = this.injectAssets(note.content, contentAssets);
+    const withLinks = this.injectWikilinks(withAssets, contentLinks);
     const html = this.md.render(withLinks);
 
     this.logger?.info('Markdown rendered to HTML', {

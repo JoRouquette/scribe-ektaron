@@ -38,7 +38,9 @@ describe('MarkdownItRenderer', () => {
 
     const html = await renderer.render(note);
 
-    expect(html).toContain('<figure class="md-asset md-asset-image align-right rounded"');
+    expect(html).toContain(
+      '<img class="md-asset md-asset-image align-right is-inline rounded"'
+    );
     expect(html).toContain('src="/assets/images/pic.png"');
     expect(html).toContain('max-width:300px');
   });
@@ -61,6 +63,25 @@ describe('MarkdownItRenderer', () => {
     expect(html).toContain('md-asset-download');
     expect(html).toContain('href="/assets/docs/file.pdf"');
     expect(html).not.toContain('<iframe');
+  });
+
+  it('ignores assets coming from frontmatter when injecting content', async () => {
+    const renderer = new MarkdownItRenderer();
+    const note = baseNote();
+    note.content = 'Hello';
+    note.assets = [
+      {
+        raw: '![[images/pic.png]]',
+        target: 'images/pic.png',
+        kind: 'image',
+        origin: 'frontmatter',
+        display: { classes: [], rawModifiers: [] },
+      },
+    ];
+
+    const html = await renderer.render(note);
+
+    expect(html).not.toContain('<img');
   });
 
   it('renders resolved wikilinks as anchors and unresolved as accent text', async () => {
