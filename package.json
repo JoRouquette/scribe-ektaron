@@ -1,6 +1,6 @@
 {
   "name": "obsidian-vps-publish-workspace",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "scripts": {
     "prepare": "husky",
     "start node": "nx serve node",

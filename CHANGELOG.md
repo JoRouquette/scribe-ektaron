@@ -1,3 +1,11 @@
+## <small>3.2.1 (2025-12-04)</small>
+
+* Merge branch 'fix/search-and-filtering' into release ([3bf4cb4](https://github.com/JoRouquette/obsidian-vps-publish/commit/3bf4cb4))
+* Merge branch 'release' ([1a6440f](https://github.com/JoRouquette/obsidian-vps-publish/commit/1a6440f))
+* chore: add format:write tasks to all project configurations ([b784f2b](https://github.com/JoRouquette/obsidian-vps-publish/commit/b784f2b))
+* fix: improve search UX with empty states and auto-expand ([d128497](https://github.com/JoRouquette/obsidian-vps-publish/commit/d128497))
+* fix(search): implement global content search with sentence-level indexing ([0d923a1](https://github.com/JoRouquette/obsidian-vps-publish/commit/0d923a1))
+
 ## 3.2.0 (2025-12-04)
 
 * Merge branch 'feature/abstracts-and-styles' into release ([efbbb85](https://github.com/JoRouquette/obsidian-vps-publish/commit/efbbb85))
