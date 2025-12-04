@@ -72,6 +72,54 @@
       "args": ["nx", "run", "obsidian-vps-publish:package"],
       "dependsOn": ["Plugin: build"],
       "problemMatcher": []
+    },
+    {
+      "label": "Build all",
+      "type": "shell",
+      "command": "npx",
+      "args": ["nx", "run-many", "--target=build", "--all"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint all",
+      "type": "shell",
+      "command": "npx",
+      "args": ["nx", "run-many", "--target=lint", "--all"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Test all",
+      "type": "shell",
+      "command": "npx",
+      "args": ["nx", "run-many", "--target=test", "--all", "--code-coverage"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Format all",
+      "type": "shell",
+      "command": "npx",
+      "args": ["nx", "run-many", "--target=format", "--all", "--check"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Merge current branch to release",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "CURRENT_BRANCH=$(git branch --show-current) && git checkout release && git pull origin release && git merge --no-ff $CURRENT_BRANCH && git push origin release && git checkout $CURRENT_BRANCH"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Merge release on main",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git checkout main && git pull origin main && git merge --no-ff release && git push origin main && git checkout release"
+      ],
+      "problemMatcher": []
     }
   ]
 }

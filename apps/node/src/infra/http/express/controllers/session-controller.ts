@@ -5,13 +5,15 @@ import {
   CreateSessionCommand,
   CreateSessionHandler,
   FinishSessionHandler,
-  LoggerPort,
   UploadAssetsCommand,
   UploadAssetsHandler,
   UploadNotesCommand,
   UploadNotesHandler,
 } from '@core-application';
+import { LoggerPort } from '@core-domain';
 import { SessionInvalidError, SessionNotFoundError } from '@core-domain';
+import { CalloutRendererService } from '../../../markdown/callout-renderer.service';
+import { SessionFinalizerService } from '../../../sessions/session-finalizer.service';
 
 import { BYTES_LIMIT } from '../app';
 import { StagingManager } from '../../../filesystem/staging-manager';
@@ -26,7 +28,9 @@ export function createSessionController(
   abortSessionHandler: AbortSessionHandler,
   notePublicationHandler: UploadNotesHandler,
   assetPublicationHandler: UploadAssetsHandler,
+  sessionFinalizer: SessionFinalizerService,
   stagingManager: StagingManager,
+  calloutRenderer: CalloutRendererService,
   logger?: LoggerPort
 ): Router {
   const router = Router();
@@ -43,7 +47,7 @@ export function createSessionController(
     }
 
     // Ensure required fields are present for CreateSessionCommand
-    const { notesPlanned, assetsPlanned, batchConfig } = parsed.data;
+    const { notesPlanned, assetsPlanned, batchConfig, calloutStyles } = parsed.data;
     if (typeof notesPlanned !== 'number' || typeof assetsPlanned !== 'number') {
       routeLogger?.warn('Missing required fields for session creation', {
         notesPlanned,
@@ -63,6 +67,13 @@ export function createSessionController(
     };
 
     try {
+      if (calloutStyles?.length) {
+        calloutRenderer.extendFromStyles(calloutStyles);
+        routeLogger?.info('Custom callout styles registered', {
+          count: calloutStyles.length,
+        });
+      }
+
       const result = await createSessionHandler.handle(command);
       routeLogger?.info('Session created', { sessionId: result.sessionId });
 
@@ -183,6 +194,11 @@ export function createSessionController(
     try {
       const result = await finishSessionHandler.handle(command);
       routeLogger?.info('Session finished', { sessionId: result.sessionId });
+
+      await sessionFinalizer.rebuildFromStored(req.params.sessionId);
+      routeLogger?.info('Session content rebuilt from full batch', {
+        sessionId: req.params.sessionId,
+      });
 
       await stagingManager.promoteSession(req.params.sessionId);
       routeLogger?.info('Staging promoted to production', { sessionId: req.params.sessionId });

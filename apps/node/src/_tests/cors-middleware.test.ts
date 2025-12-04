@@ -9,9 +9,7 @@ describe('createCorsMiddleware', () => {
     app.use(createCorsMiddleware(['https://allowed.dev']));
     app.get('/test', (_req, res) => res.send('ok'));
 
-    const preflight = await request(app)
-      .options('/test')
-      .set('Origin', 'https://allowed.dev');
+    const preflight = await request(app).options('/test').set('Origin', 'https://allowed.dev');
     expect(preflight.status).toBe(200);
     expect(preflight.headers['access-control-allow-origin']).toBe('https://allowed.dev');
 

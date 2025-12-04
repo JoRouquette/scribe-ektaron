@@ -6,8 +6,22 @@ const manifest: Manifest = {
   createdAt: '',
   lastUpdatedAt: '',
   pages: [
-    { id: '1', route: '/a', title: 'Alpha', tags: ['one'], relativePath: 'a.md', slug: Slug.from('a') },
-    { id: '2', route: '/b', title: 'Beta', tags: ['two'], relativePath: 'b.md', slug: Slug.from('b') },
+    {
+      id: '1',
+      route: '/a',
+      title: 'Alpha',
+      tags: ['one'],
+      relativePath: 'a.md',
+      slug: Slug.from('a'),
+    },
+    {
+      id: '2',
+      route: '/b',
+      title: 'Beta',
+      tags: ['two'],
+      relativePath: 'b.md',
+      slug: Slug.from('b'),
+    },
   ],
 };
 

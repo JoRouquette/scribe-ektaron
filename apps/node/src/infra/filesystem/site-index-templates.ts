@@ -48,7 +48,8 @@ export function renderFolderIndex(
   const pageList = pages
     .sort((a, b) => a.title.localeCompare(b.title))
     .map(
-      (p) => `<li><a class="index-link" href="${withLeadingSlash(p.route)}">${escapeHtml(p.title)}</a></li>`
+      (p) =>
+        `<li><a class="index-link" href="${withLeadingSlash(p.route)}">${escapeHtml(p.title)}</a></li>`
     )
     .join('');
 
