@@ -38,9 +38,7 @@ describe('MarkdownItRenderer', () => {
 
     const html = await renderer.render(note);
 
-    expect(html).toContain(
-      '<img class="md-asset md-asset-image align-right is-inline rounded"'
-    );
+    expect(html).toContain('<img class="md-asset md-asset-image align-right is-inline rounded"');
     expect(html).toContain('src="/assets/images/pic.png"');
     expect(html).toContain('max-width:300px');
   });
@@ -109,8 +107,39 @@ describe('MarkdownItRenderer', () => {
 
     const html = await renderer.render(note);
 
-    expect(html).toContain('<a class="wikilink" href="/notes/resolved">Alias</a>');
+    expect(html).toContain(
+      '<a class="wikilink" data-wikilink="Resolved" href="/notes/resolved">Alias</a>'
+    );
     expect(html).toContain('<span class="wikilink wikilink-unresolved"');
     expect(html).not.toContain('[[Missing]]');
+  });
+
+  it('renders obsidian callouts with title and body', async () => {
+    const renderer = new MarkdownItRenderer();
+    const note = baseNote();
+    note.content = ['> [!warning] Attention', '> Something went wrong.'].join('\n');
+
+    const html = await renderer.render(note);
+
+    expect(html).toContain('class="callout"');
+    expect(html).toContain('data-callout="warning"');
+    expect(html).toContain('class="callout-icon material-symbols-outlined"');
+    expect(html).toContain('<span class="callout-label">Attention</span>');
+    expect(html).toContain('<div class="callout-content">');
+    expect(html).toContain('<p>Something went wrong.</p>');
+    expect(html).not.toContain('[!warning]');
+  });
+
+  it('supports collapsible callouts syntax', async () => {
+    const renderer = new MarkdownItRenderer();
+    const note = baseNote();
+    note.content = ['> [!note]- Collapsible', '> Hidden by default.'].join('\n');
+
+    const html = await renderer.render(note);
+
+    expect(html).toContain('<details class="callout"');
+    expect(html).toContain('data-callout-fold="closed"');
+    expect(html).toContain('class="callout-icon material-symbols-outlined"');
+    expect(html).not.toContain('[!note]-');
   });
 });

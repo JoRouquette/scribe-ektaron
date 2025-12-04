@@ -6,4 +6,12 @@ export const CreateSessionBodyDto = z.object({
   batchConfig: z.object({
     maxBytesPerRequest: z.number().int().positive(),
   }),
+  calloutStyles: z
+    .array(
+      z.object({
+        path: z.string().min(1),
+        css: z.string().optional().default(''),
+      })
+    )
+    .optional(),
 });

@@ -1,34 +1,51 @@
 import MarkdownIt from 'markdown-it';
 import type { LoggerPort, MarkdownRendererPort } from '@core-application';
 import { AssetRef, PublishableNote, ResolvedWikilink } from '@core-domain';
+import { CalloutRendererService } from './callout-renderer.service';
 
 export class MarkdownItRenderer implements MarkdownRendererPort {
   private readonly md: MarkdownIt;
+  private readonly calloutRenderer: CalloutRendererService;
 
-  constructor(private readonly logger?: LoggerPort) {
+  constructor(
+    calloutRenderer?: CalloutRendererService,
+    private readonly logger?: LoggerPort
+  ) {
+    this.calloutRenderer = calloutRenderer ?? new CalloutRendererService();
     this.md = new MarkdownIt({
       html: true,
       linkify: true,
       typographer: true,
     });
+
+    this.calloutRenderer.register(this.md);
   }
 
   async render(note: PublishableNote): Promise<string> {
     const contentAssets = (note.assets ?? []).filter((a) => a.origin !== 'frontmatter');
-    const contentLinks = (note.resolvedWikilinks ?? []).filter(
-      (l) => l.origin !== 'frontmatter'
-    );
+    const contentLinks = (note.resolvedWikilinks ?? []).filter((l) => l.origin !== 'frontmatter');
 
     const withAssets = this.injectAssets(note.content, contentAssets);
     const withLinks = this.injectWikilinks(withAssets, contentLinks);
     const html = this.md.render(withLinks);
+    const iconFontLink = [
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />',
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />',
+    ].join('\n');
+    const userCss = this.calloutRenderer.getUserCss();
+    const inlineCalloutCss =
+      `.material-symbols-outlined,.material-icons{font-family:'Material Symbols Outlined','Material Icons';font-weight:400;font-style:normal;font-size:1.1em;line-height:1;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;display:inline-flex;vertical-align:text-bottom;}` +
+      `.callout-icon{font-family:'Material Symbols Outlined','Material Icons';}`;
+    const withStyles = `${iconFontLink}\n<style data-callout-styles>${inlineCalloutCss}${
+      userCss ? '\n' + userCss : ''
+    }</style>\n${html}`;
 
     this.logger?.info('Markdown rendered to HTML', {
       noteId: note.noteId,
       slug: note.routing.slug,
     });
-    this.logger?.debug('Rendered HTML content', html);
-    return html;
+    this.logger?.debug('Rendered HTML content', withStyles);
+    return withStyles;
   }
 
   private injectAssets(content: string, assets: AssetRef[]): string {
@@ -107,10 +124,15 @@ export class MarkdownItRenderer implements MarkdownRendererPort {
     if (link.isResolved) {
       const hrefTarget = link.href ?? link.path ?? link.target;
       const href = this.escapeAttribute(encodeURI(hrefTarget));
-      return `<a class="wikilink" href="${href}">${label}</a>`;
+      return `<a class="wikilink" data-wikilink="${this.escapeAttribute(link.target)}" href="${href}">${label}</a>`;
     }
 
-    return `<span class="wikilink wikilink-unresolved" style="color: var(--mat-sys-primary);">${label}</span>`;
+    const tooltip = 'Cette page arrive prochainement';
+    return `<span class="wikilink wikilink-unresolved" role="link" aria-disabled="true" title="${this.escapeAttribute(
+      tooltip
+    )}" data-tooltip="${this.escapeAttribute(tooltip)}" data-wikilink="${this.escapeAttribute(
+      link.target
+    )}">${label}</span>`;
   }
 
   private buildAssetUrl(target: string): string {

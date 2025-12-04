@@ -17,7 +17,11 @@ describe('NotesFileSystemStorage', () => {
 
   it('saves HTML to normalized route with slug', async () => {
     const storage = new NotesFileSystemStorage(tmpDir);
-    await storage.save({ route: '/docs/getting-started', content: '<p>Hello</p>', slug: 'getting-started' });
+    await storage.save({
+      route: '/docs/getting-started',
+      content: '<p>Hello</p>',
+      slug: 'getting-started',
+    });
 
     const target = path.join(tmpDir, 'docs', 'getting-started.html');
     expect(fs.existsSync(target)).toBe(true);

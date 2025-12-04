@@ -24,7 +24,14 @@ describe('Note Entities', () => {
     vaultFolder: 'notes',
     routeBase: '/notes',
     vpsId: 'vps1',
-    sanitization: [{ name: 'Remove fenced code blocks', regex: '```[\\s\\S]*?```', replacement: '', isEnabled: true }],
+    sanitization: [
+      {
+        name: 'Remove fenced code blocks',
+        regex: '```[\\s\\S]*?```',
+        replacement: '',
+        isEnabled: true,
+      },
+    ],
   };
 
   const assetDisplay: AssetDisplayOptions = {

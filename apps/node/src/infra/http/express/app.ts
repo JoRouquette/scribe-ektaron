@@ -5,19 +5,22 @@ import {
   AbortSessionHandler,
   CreateSessionHandler,
   FinishSessionHandler,
-  LoggerPort,
   UploadAssetsHandler,
   UploadNotesHandler,
 } from '@core-application';
+import { LoggerPort } from '@core-domain';
 
 import { EnvConfig } from '../../config/env-config';
 import { AssetsFileSystemStorage } from '../../filesystem/assets-file-system.storage';
 import { FileSystemSessionRepository } from '../../filesystem/file-system-session.repository';
 import { ManifestFileSystem } from '../../filesystem/manifest-file-system';
 import { NotesFileSystemStorage } from '../../filesystem/notes-file-system.storage';
+import { SessionNotesFileStorage } from '../../filesystem/session-notes-file.storage';
 import { StagingManager } from '../../filesystem/staging-manager';
 import { UuidIdGenerator } from '../../id/uuid-id.generator';
+import { CalloutRendererService } from '../../markdown/callout-renderer.service';
 import { MarkdownItRenderer } from '../../markdown/markdown-it.renderer';
+import { SessionFinalizerService } from '../../sessions/session-finalizer.service';
 
 import { createHealthCheckController } from './controllers/health-check.controller';
 import { createPingController } from './controllers/ping.controller';
@@ -48,12 +51,14 @@ export function createApp(rootLogger?: LoggerPort) {
     allowedOrigins: EnvConfig.allowedOrigins(),
   });
 
-  const markdownRenderer = new MarkdownItRenderer(rootLogger);
+  const calloutRenderer = new CalloutRendererService();
+  const markdownRenderer = new MarkdownItRenderer(calloutRenderer, rootLogger);
   const stagingManager = new StagingManager(
     EnvConfig.contentRoot(),
     EnvConfig.assetsRoot(),
     rootLogger
   );
+  const sessionNotesStorage = new SessionNotesFileStorage(EnvConfig.contentRoot(), rootLogger);
   const noteStorage = (sessionId: string) =>
     new NotesFileSystemStorage(stagingManager.contentStagingPath(sessionId), rootLogger);
   const manifestFileSystem = (sessionId: string) =>
@@ -66,12 +71,21 @@ export function createApp(rootLogger?: LoggerPort) {
     markdownRenderer,
     noteStorage,
     manifestFileSystem,
-    rootLogger
+    rootLogger,
+    sessionNotesStorage
   );
   const uploadAssetsHandler = new UploadAssetsHandler(assetStorage, rootLogger);
   const createSessionHandler = new CreateSessionHandler(idGenerator, sessionRepository, rootLogger);
   const finishSessionHandler = new FinishSessionHandler(sessionRepository, rootLogger);
   const abortSessionHandler = new AbortSessionHandler(sessionRepository, rootLogger);
+  const sessionFinalizer = new SessionFinalizerService(
+    sessionNotesStorage,
+    stagingManager,
+    markdownRenderer,
+    noteStorage,
+    manifestFileSystem,
+    rootLogger
+  );
 
   // API routes (protégées par API key)
   const apiRouter = express.Router();
@@ -86,7 +100,9 @@ export function createApp(rootLogger?: LoggerPort) {
       abortSessionHandler,
       uploadNotesHandler,
       uploadAssetsHandler,
+      sessionFinalizer,
       stagingManager,
+      calloutRenderer,
       rootLogger
     )
   );

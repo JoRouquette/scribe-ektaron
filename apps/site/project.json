@@ -28,8 +28,8 @@
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "8kb",
-              "maximumError": "16kb"
+              "maximumWarning": "500kb",
+              "maximumError": "1Mb"
             }
           ],
           "outputHashing": "all"
@@ -84,6 +84,12 @@
         "buildTarget": "site:build",
         "staticFilePath": "dist/apps/site/browser",
         "spa": true
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prettier --check \"apps/site/**/*.{ts,scss,html,json,md}\""
       }
     }
   }

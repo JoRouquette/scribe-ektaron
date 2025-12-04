@@ -1,9 +1,32 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@200;400;600&display=swap');
+
 :host {
   display: block;
   inline-size: 100%;
   block-size: 100%;
   min-width: 0;
   min-height: 0;
+}
+
+.wikilink-tooltip-proxy {
+  position: fixed;
+  inline-size: 0;
+  block-size: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Tooltip styling for unresolved wikilinks */
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: color-mix(in oklab, var(--c-surface-variant, #2b2b2b) 90%, #000);
+  color: var(--c-on-surface, #f5f5f5);
+  border: 1px solid color-mix(in oklab, var(--c-outline, #555) 60%, transparent);
+  box-shadow: 0 4px 16px color-mix(in oklab, #000 40%, transparent);
+  text-align: center;
+  inline-size: fit-content;
+  max-inline-size: 32ch;
+  padding: 0.4rem 0.6rem;
 }
 
 .viewer {
@@ -122,6 +145,42 @@
       text-underline-offset: 0.12em;
     }
 
+    /* Wikilinks */
+    .wikilink {
+      text-decoration: underline dotted;
+      text-decoration-thickness: 1px;
+      color: var(--c-secondary);
+    }
+
+    .wikilink-unresolved {
+      color: color-mix(in oklab, var(--c-on-surface) 65%, transparent);
+      cursor: not-allowed;
+    }
+
+    /* Material icons/ligatures inside markdown */
+    .material-icons,
+    .material-icons-outlined,
+    .material-symbols-outlined {
+      font-family:
+        'Material Icons', 'Material Symbols Outlined', 'Material Symbols Rounded',
+        'Material Symbols Sharp', sans-serif;
+      font-weight: normal;
+      font-style: normal;
+      font-size: 1.1em;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      align-items: center;
+      vertical-align: text-bottom;
+      white-space: nowrap;
+      direction: ltr;
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+
     /* Code inline & blocs */
     code {
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
@@ -154,6 +213,134 @@
       border-radius: 0.5rem;
     }
 
+    /* Callouts (Obsidian-style) */
+    .callout {
+      --callout-color: color-mix(in oklab, var(--c-secondary) 70%, var(--c-primary) 30%);
+      margin: 1rem auto;
+      border: 1px solid color-mix(in oklab, var(--callout-color) 35%, var(--c-outline) 55%);
+      border-inline-start: 6px solid var(--callout-color);
+      border-radius: 0.75rem;
+      background: color-mix(in oklab, var(--callout-color) 6%, var(--c-surface-variant) 22%);
+      overflow: hidden;
+      box-shadow: 0 10px 28px color-mix(in oklab, #000 6%, transparent);
+    }
+
+    details.callout {
+      padding: 0;
+    }
+
+    .callout-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1rem;
+      background: color-mix(in oklab, var(--callout-color) 24%, var(--c-surface));
+      color: color-mix(in oklab, var(--callout-color) 85%, #fff 15%);
+      font-weight: 700;
+      line-height: 1.3;
+      cursor: default;
+      user-select: none;
+    }
+
+    details.callout .callout-title {
+      list-style: none;
+      cursor: pointer;
+    }
+
+    details.callout .callout-title::-webkit-details-marker {
+      display: none;
+    }
+
+    details.callout .callout-title:focus-visible {
+      outline: 2px solid var(--callout-color);
+      outline-offset: 2px;
+    }
+
+    details.callout .callout-title::after {
+      content: '>';
+      font-size: 0.95rem;
+      margin-inline-start: auto;
+      transition: transform 0.2s ease;
+    }
+
+    details.callout:not([open]) .callout-title::after {
+      transform: rotate(-90deg);
+    }
+
+    .callout-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-inline-size: 2rem;
+      min-block-size: 2rem;
+      border-radius: 0.65rem;
+      background: color-mix(in oklab, var(--callout-color) 26%, transparent);
+      color: color-mix(in oklab, #fff 85%, var(--callout-color) 15%);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-family: 'Material Symbols Outlined', 'Material Icons';
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 600,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+
+    .callout-label {
+      flex: 1;
+    }
+
+    .callout-content {
+      padding: 0.65rem 1rem 0.85rem;
+      background: color-mix(in oklab, var(--callout-color) 4%, var(--c-surface));
+    }
+
+    details.callout:not([open]) .callout-content {
+      display: none;
+    }
+
+    .callout[data-callout='info'] {
+      --callout-color: var(--c-primary);
+    }
+
+    .callout[data-callout='note'] {
+      --callout-color: color-mix(in oklab, var(--c-secondary) 65%, var(--c-primary) 35%);
+    }
+
+    .callout[data-callout='tip'],
+    .callout[data-callout='todo'] {
+      --callout-color: color-mix(in oklab, #10b981 60%, var(--c-secondary) 40%);
+    }
+
+    .callout[data-callout='success'] {
+      --callout-color: color-mix(in oklab, #0f9d58 70%, var(--c-secondary) 30%);
+    }
+
+    .callout[data-callout='question'] {
+      --callout-color: color-mix(in oklab, #3b82f6 70%, var(--c-primary) 30%);
+    }
+
+    .callout[data-callout='warning'] {
+      --callout-color: color-mix(in oklab, #f59e0b 80%, var(--c-primary) 20%);
+    }
+
+    .callout[data-callout='failure'],
+    .callout[data-callout='danger'],
+    .callout[data-callout='bug'] {
+      --callout-color: color-mix(in oklab, #ef4444 80%, var(--c-primary) 20%);
+    }
+
+    .callout[data-callout='example'],
+    .callout[data-callout='abstract'] {
+      --callout-color: color-mix(in oklab, #7c3aed 70%, var(--c-secondary) 30%);
+    }
+
+    .callout[data-callout='quote'] {
+      --callout-color: color-mix(in oklab, var(--c-outline) 80%, var(--c-headers) 20%);
+    }
+
     /* Séparateurs */
     hr {
       border: 0;
@@ -162,27 +349,69 @@
       max-inline-size: min(var(--measure), 100%);
     }
 
-    /* Tables & médias à la largeur de la “page” */
+    /* Tables : centrées, scroll horizontal, lisibles */
     table {
+      display: contents;
       border-collapse: collapse;
+      border-spacing: 0;
       width: 100%;
-      display: block;
-      overflow-x: auto;
+      min-width: 100%;
+      max-width: min(140vw, 1200px);
+      table-layout: auto;
+      overflow-x: unset;
       border: 1px solid color-mix(in oklab, var(--c-outline) 40%, transparent);
-      border-radius: 0.625rem;
-      margin: 0.9rem auto;
+      border-radius: 0.75rem;
+      margin: 1rem auto;
+      padding: 0.1rem;
+      background: color-mix(in oklab, var(--c-surface-variant) 8%, transparent);
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in oklab, var(--c-outline) 40%, transparent) transparent;
     }
 
     thead {
       background: color-mix(in oklab, var(--c-surface-variant) 14%, transparent);
+      position: sticky;
+      top: 0;
     }
 
     th,
     td {
-      padding: 0.45rem 0.7rem;
+      padding: 0.6rem 0.85rem;
       border-bottom: 1px solid color-mix(in oklab, var(--c-outline) 32%, transparent);
       vertical-align: top;
       white-space: normal;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+
+    th:first-child,
+    td:first-child {
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: normal;
+      min-width: 7ch;
+      max-width: 20ch;
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+      width: auto;
+      max-width: none;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: color-mix(in oklab, var(--c-surface-variant) 6%, transparent);
+    }
+
+    caption {
+      caption-side: bottom;
+      padding: 0.4rem 0.6rem;
+      color: color-mix(in oklab, var(--c-on-surface) 70%, transparent);
+      font-size: 0.9rem;
+      text-align: left;
     }
 
     tr:last-child td {
@@ -255,6 +484,12 @@
     .content .markdown-body td {
       padding: 0.4rem 0.55rem;
     }
+
+    /* Tables mobile : conserver le sticky header et scroll horizontal */
+    .content .markdown-body table {
+      max-width: 100%;
+      min-width: 100%;
+    }
   }
 }
 
@@ -267,7 +502,10 @@
     border-radius: 0.75rem;
     background: color-mix(in oklab, var(--c-surface-variant) 8%, transparent);
     overflow: hidden;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
 
     summary {
       display: flex;
@@ -294,7 +532,10 @@
       content: '+';
       font-weight: 700;
       color: var(--c-headers);
-      transition: transform 0.2s ease, color 0.2s ease, content 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        color 0.2s ease,
+        content 0.2s ease;
     }
 
     &[open] summary::after {
