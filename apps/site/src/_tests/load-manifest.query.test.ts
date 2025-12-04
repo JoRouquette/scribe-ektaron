@@ -4,7 +4,12 @@ import { Manifest, ManifestRepository } from '@core-domain';
 describe('LoadManifestHandler', () => {
   it('delegates to repository', async () => {
     const mockRepo: ManifestRepository = {
-      load: jest.fn().mockResolvedValue({ sessionId: 's', createdAt: '', lastUpdatedAt: '', pages: [] } as Manifest),
+      load: jest.fn().mockResolvedValue({
+        sessionId: 's',
+        createdAt: '',
+        lastUpdatedAt: '',
+        pages: [],
+      } as Manifest),
     };
 
     const q = new LoadManifestHandler(mockRepo);

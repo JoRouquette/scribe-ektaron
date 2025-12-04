@@ -9,8 +9,7 @@ export const APP_ROUTES: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        loadComponent: () =>
-          import('../pages/home/home.component').then((m) => m.HomeComponent),
+        loadComponent: () => import('../pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
         path: '**',

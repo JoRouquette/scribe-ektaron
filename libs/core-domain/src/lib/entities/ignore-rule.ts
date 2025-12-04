@@ -5,11 +5,7 @@ export class IgnoreRule {
   ignoreIf?: boolean;
   ignoreValues?: IgnorePrimitive[];
 
-  constructor(data: {
-    property: string;
-    ignoreIf?: boolean;
-    ignoreValues?: IgnorePrimitive[];
-  }) {
+  constructor(data: { property: string; ignoreIf?: boolean; ignoreValues?: IgnorePrimitive[] }) {
     this.property = data.property;
     this.ignoreIf = data.ignoreIf;
     this.ignoreValues = data.ignoreValues;

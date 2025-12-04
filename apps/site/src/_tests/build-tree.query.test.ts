@@ -6,11 +6,39 @@ const manifest: Manifest = {
   createdAt: '',
   lastUpdatedAt: '',
   pages: [
-    { id: '1', route: '/guide/start', title: 'Start', tags: [], relativePath: 'guide/start.md', slug: Slug.from('start') },
-    { id: '2', route: '/guide/deep/page', title: 'Deep', tags: [], relativePath: 'guide/deep/page.md', slug: Slug.from('page') },
-    { id: '3', route: '/home', title: 'Home', tags: [], relativePath: 'home.md', slug: Slug.from('home') },
+    {
+      id: '1',
+      route: '/guide/start',
+      title: 'Start',
+      tags: [],
+      relativePath: 'guide/start.md',
+      slug: Slug.from('start'),
+    },
+    {
+      id: '2',
+      route: '/guide/deep/page',
+      title: 'Deep',
+      tags: [],
+      relativePath: 'guide/deep/page.md',
+      slug: Slug.from('page'),
+    },
+    {
+      id: '3',
+      route: '/home',
+      title: 'Home',
+      tags: [],
+      relativePath: 'home.md',
+      slug: Slug.from('home'),
+    },
     // duplicate file to cover skip branch
-    { id: '4', route: '/home', title: 'Home Duplicate', tags: [], relativePath: 'home.md', slug: Slug.from('home') },
+    {
+      id: '4',
+      route: '/home',
+      title: 'Home Duplicate',
+      tags: [],
+      relativePath: 'home.md',
+      slug: Slug.from('home'),
+    },
   ],
 };
 
