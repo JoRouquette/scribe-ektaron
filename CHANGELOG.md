@@ -1,3 +1,11 @@
+## <small>3.2.2 (2025-12-04)</small>
+
+* Merge branch 'fix/frontmatter-properties' into release ([2fed1d9](https://github.com/JoRouquette/obsidian-vps-publish/commit/2fed1d9))
+* Merge branch 'release' ([602a62b](https://github.com/JoRouquette/obsidian-vps-publish/commit/602a62b))
+* fix: normalize and display frontmatter property keys consistently ([8ef07f4](https://github.com/JoRouquette/obsidian-vps-publish/commit/8ef07f4))
+* fix(vps): add VPS cleanup endpoint with staged content removal ([637276a](https://github.com/JoRouquette/obsidian-vps-publish/commit/637276a))
+* ci: enable Docker Hub image caching and simplify merge tasks ([36b879b](https://github.com/JoRouquette/obsidian-vps-publish/commit/36b879b))
+
 ## <small>3.2.1 (2025-12-04)</small>
 
 * Merge branch 'fix/search-and-filtering' into release ([3bf4cb4](https://github.com/JoRouquette/obsidian-vps-publish/commit/3bf4cb4))
