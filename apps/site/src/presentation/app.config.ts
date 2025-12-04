@@ -3,10 +3,16 @@ import { ANIMATION_MODULE_TYPE, ApplicationConfig } from '@angular/core';
 import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
-import { CONFIG_REPOSITORY, CONTENT_REPOSITORY, MANIFEST_REPOSITORY } from '../domain/ports/tokens';
+import {
+  CONFIG_REPOSITORY,
+  CONTENT_REPOSITORY,
+  MANIFEST_REPOSITORY,
+  SEARCH_INDEX_REPOSITORY,
+} from '../domain/ports/tokens';
 import { HttpConfigRepository } from '../infrastructure/http/http-config.repository';
 import { HttpContentRepository } from '../infrastructure/http/http-content.repository';
 import { HttpManifestRepository } from '../infrastructure/http/http-manifest.repository';
+import { HttpSearchIndexRepository } from '../infrastructure/http/http-search-index.repository';
 import { APP_ROUTES } from './routes/app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     { provide: MANIFEST_REPOSITORY, useClass: HttpManifestRepository },
     { provide: CONFIG_REPOSITORY, useClass: HttpConfigRepository },
     { provide: CONTENT_REPOSITORY, useClass: HttpContentRepository },
+    { provide: SEARCH_INDEX_REPOSITORY, useClass: HttpSearchIndexRepository },
     { provide: ANIMATION_MODULE_TYPE, useValue: 'BrowserAnimationsModule' },
     { provide: MATERIAL_ANIMATIONS, useValue: 'enabled' },
   ],

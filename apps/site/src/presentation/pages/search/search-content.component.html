@@ -1,0 +1,71 @@
+<section class="search-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Recherche globale</p>
+      <h1>Explorer le contenu du site</h1>
+      <p class="hint">Tapez au moins 3 caractères dans la barre de recherche en haut.</p>
+    </div>
+  </header>
+
+  @if (search.loading()) {
+    <div class="state">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      <p>Chargement de l'index de recherche…</p>
+    </div>
+  }
+
+  @if (search.error()) {
+    <div class="state error" role="alert">
+      <mat-icon aria-hidden="true">error</mat-icon>
+      <p>{{ search.error() }}</p>
+    </div>
+  }
+
+  @if (!search.loading() && !search.error() && search.queryTooShort()) {
+    <div class="state info">
+      <mat-icon aria-hidden="true">info</mat-icon>
+      <p>Entrez au moins 3 caractères pour lancer une recherche.</p>
+    </div>
+  }
+
+  @if (
+    !search.loading() &&
+    !search.error() &&
+    search.hasQuery() &&
+    !search.queryTooShort() &&
+    !hasResults()
+  ) {
+    <div class="state muted">
+      <mat-icon aria-hidden="true">search_off</mat-icon>
+      <p>Aucun résultat pour « {{ search.query() }} »</p>
+    </div>
+  }
+
+  @if (hasResults()) {
+    <div class="results">
+      @for (res of search.results(); track res.route) {
+        <article class="result-card">
+          <h2>
+            <a [routerLink]="routeLink(res.route)">{{ res.title }}</a>
+          </h2>
+          <ul class="matches" aria-label="Extraits contenant la recherche">
+            @for (m of res.matches; track m.sentence) {
+              <li>
+                <p class="sentence">
+                  @for (p of m.parts; track $index) {
+                    @if (p.matched) {
+                      <mark>{{ p.text }}</mark>
+                    }
+                    @if (!p.matched) {
+                      <span class="text">{{ p.text }}</span>
+                    }
+                  }
+                </p>
+              </li>
+            }
+          </ul>
+        </article>
+      }
+    </div>
+  }
+</section>

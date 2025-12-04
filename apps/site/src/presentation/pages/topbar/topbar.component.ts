@@ -3,9 +3,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
-import { CatalogFacade } from '../../../application/facades/catalog-facade';
+import { Router, RouterLink } from '@angular/router';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
+import { SearchFacade } from '../../../application/facades/search-facade';
 
 type Crumb = { label: string; url: string };
 
@@ -27,12 +27,30 @@ export class TopbarComponent {
   @Input() siteName = '';
   @Input() crumbs: Crumb[] = [];
   @Input() isDark = false;
+  @Input() lastVisited = '/';
 
   @Output() toggleTheme = new EventEmitter<void>();
 
-  constructor(public catalog: CatalogFacade) {}
+  constructor(
+    private readonly router: Router,
+    public search: SearchFacade
+  ) {}
 
-  onQueryInput(value: string) {
-    this.catalog.query.set(value ?? '');
+  async onQueryInput(value: string) {
+    const query = (value ?? '').trim();
+    this.search.setQuery(query);
+    if (query.length === 0) {
+      const target = this.router.url.startsWith('/search')
+        ? this.lastVisited || '/'
+        : this.router.url;
+      this.router.navigateByUrl(target || '/');
+      return;
+    }
+
+    if (query.length >= 3) {
+      await this.search.ensureIndex();
+    }
+
+    this.router.navigate(['/search'], { queryParams: { q: query } });
   }
 }

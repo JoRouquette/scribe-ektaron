@@ -12,6 +12,11 @@ export const APP_ROUTES: Routes = [
         loadComponent: () => import('../pages/home/home.component').then((m) => m.HomeComponent),
       },
       {
+        path: 'search',
+        loadComponent: () =>
+          import('../pages/search/search-content.component').then((m) => m.SearchContentComponent),
+      },
+      {
         path: '**',
         loadComponent: () =>
           import('../pages/viewer/viewer.component').then((m) => m.ViewerComponent),
