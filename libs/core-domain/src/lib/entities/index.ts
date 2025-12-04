@@ -26,5 +26,6 @@ export * from './resolved-asset-file';
 export * from './resolved-wikilink';
 export * from './sanitization-rules';
 export * from './session';
+export * from './search-index';
 export * from './vps-config';
 export * from './wikilink-ref';
