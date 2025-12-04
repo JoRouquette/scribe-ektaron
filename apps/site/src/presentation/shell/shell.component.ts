@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 
 import { CatalogFacade } from '../../application/facades/catalog-facade';
 import { ConfigFacade } from '../../application/facades/config-facade';
+import { SearchFacade } from '../../application/facades/search-facade';
 import { LogoComponent } from '../pages/logo/logo.component';
 import { TopbarComponent } from '../pages/topbar/topbar.component';
 import { ThemeService } from '../services/theme.service';
@@ -27,10 +28,12 @@ export class ShellComponent implements OnInit {
     private readonly config: ConfigFacade,
     private readonly catalog: CatalogFacade,
     private readonly router: Router,
+    private readonly searchFacade: SearchFacade,
     private readonly destroyRef: DestroyRef
   ) {}
 
   currentYear = new Date().getFullYear();
+  lastNonSearchUrl = '/';
 
   author = () => this.config.cfg()?.author ?? '';
   siteName = () => this.config.cfg()?.siteName ?? '';
@@ -64,15 +67,35 @@ export class ShellComponent implements OnInit {
   }
 
   private updateFromUrl() {
-    const url = this.router.url.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
+    const parsed = this.router.parseUrl(this.router.url);
+    const url = parsed.root.children['primary']?.segments.map((s) => s.path).join('/') || '';
+    const cleanUrl = ('/' + url).replace(/\/+$/, '') || '/';
 
-    if (url === '/') {
+    if (cleanUrl.startsWith('/search')) {
+      const q = (parsed.queryParams?.['q'] as string) ?? '';
+      if (q !== this.searchFacade.query()) {
+        this.searchFacade.setQuery(q);
+      }
       this._crumbs = [];
-      this.currentTitle = '';
+      this.currentTitle = 'Recherche';
       return;
     }
 
-    const rawParts = url.replace(/^\/+/, '').split('/').filter(Boolean);
+    // Leaving search: clear input
+    if (this.searchFacade.query()) {
+      this.searchFacade.setQuery('');
+    }
+
+    if (cleanUrl === '/') {
+      this._crumbs = [];
+      this.currentTitle = '';
+      this.lastNonSearchUrl = '/';
+      return;
+    }
+
+    this.lastNonSearchUrl = cleanUrl;
+
+    const rawParts = cleanUrl.replace(/^\/+/, '').split('/').filter(Boolean);
     const parts = rawParts.at(-1) === 'index' ? rawParts.slice(0, -1) : rawParts;
 
     this._crumbs = parts.map((seg, i) => {

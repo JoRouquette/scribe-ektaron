@@ -12,6 +12,7 @@ import { ContentStoragePort, ManifestPort, SessionNotesStoragePort } from '@core
 import { LoggerPort } from '@core-domain';
 
 import { StagingManager } from '../filesystem/staging-manager';
+import { ContentSearchIndexer } from '../search/content-search-indexer';
 
 type ContentStorageFactory = (sessionId: string) => ContentStoragePort;
 type ManifestStorageFactory = (sessionId: string) => ManifestPort;
@@ -81,6 +82,8 @@ export class SessionFinalizerService {
 
     await renderer.handle({ sessionId, notes: routed });
 
+    await this.rebuildContentSearchIndex(sessionId);
+
     await this.notesStorage.clear(sessionId);
     log.info('Session rebuild complete');
   }
@@ -93,5 +96,25 @@ export class SessionFinalizerService {
     // Make sure the raw notes folder exists so we can re-use it when needed.
     const rawDir = path.join(contentStage, '_raw-notes');
     await fs.mkdir(rawDir, { recursive: true });
+  }
+
+  private async rebuildContentSearchIndex(sessionId: string): Promise<void> {
+    const manifestPort = this.manifestStorage(sessionId);
+    const manifest = await manifestPort.load();
+    if (!manifest) {
+      this.logger.warn('No manifest found after rebuild; skipping search index', { sessionId });
+      return;
+    }
+
+    try {
+      const indexer = new ContentSearchIndexer(
+        this.stagingManager.contentStagingPath(sessionId),
+        this.logger
+      );
+      await indexer.build(manifest);
+      this.logger.info('Content search index rebuilt', { sessionId });
+    } catch (error) {
+      this.logger.warn('Failed to rebuild content search index', { sessionId, error });
+    }
   }
 }
