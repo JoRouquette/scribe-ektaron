@@ -1,3 +1,51 @@
+## <small>3.2.2 (2025-12-04)</small>
+
+* Merge branch 'fix/frontmatter-properties' into release ([2fed1d9](https://github.com/JoRouquette/obsidian-vps-publish/commit/2fed1d9))
+* Merge branch 'release' ([602a62b](https://github.com/JoRouquette/obsidian-vps-publish/commit/602a62b))
+* fix: normalize and display frontmatter property keys consistently ([8ef07f4](https://github.com/JoRouquette/obsidian-vps-publish/commit/8ef07f4))
+* fix(vps): add VPS cleanup endpoint with staged content removal ([637276a](https://github.com/JoRouquette/obsidian-vps-publish/commit/637276a))
+* ci: enable Docker Hub image caching and simplify merge tasks ([36b879b](https://github.com/JoRouquette/obsidian-vps-publish/commit/36b879b))
+
+## <small>3.2.1 (2025-12-04)</small>
+
+* Merge branch 'fix/search-and-filtering' into release ([3bf4cb4](https://github.com/JoRouquette/obsidian-vps-publish/commit/3bf4cb4))
+* Merge branch 'release' ([1a6440f](https://github.com/JoRouquette/obsidian-vps-publish/commit/1a6440f))
+* chore: add format:write tasks to all project configurations ([b784f2b](https://github.com/JoRouquette/obsidian-vps-publish/commit/b784f2b))
+* fix: improve search UX with empty states and auto-expand ([d128497](https://github.com/JoRouquette/obsidian-vps-publish/commit/d128497))
+* fix(search): implement global content search with sentence-level indexing ([0d923a1](https://github.com/JoRouquette/obsidian-vps-publish/commit/0d923a1))
+
+## 3.2.0 (2025-12-04)
+
+* Merge branch 'feature/abstracts-and-styles' into release ([efbbb85](https://github.com/JoRouquette/obsidian-vps-publish/commit/efbbb85))
+* Merge branch 'hotfix/fix-tests' into release ([9621ab1](https://github.com/JoRouquette/obsidian-vps-publish/commit/9621ab1))
+* Merge branch 'release' ([9c8c037](https://github.com/JoRouquette/obsidian-vps-publish/commit/9c8c037))
+* ci: add tasks ([6b11374](https://github.com/JoRouquette/obsidian-vps-publish/commit/6b11374))
+* chore: format all files ([e7f9b9d](https://github.com/JoRouquette/obsidian-vps-publish/commit/e7f9b9d))
+* fix: resolve wikilinks against full session batch for accurate cross-references ([21be6d1](https://github.com/JoRouquette/obsidian-vps-publish/commit/21be6d1))
+* fix(callouts): replace text icons with Material Symbols and improve styling ([66b1840](https://github.com/JoRouquette/obsidian-vps-publish/commit/66b1840))
+* feat: add callouts ([526f84f](https://github.com/JoRouquette/obsidian-vps-publish/commit/526f84f))
+* feat: add custom callout styles support ([066ac2b](https://github.com/JoRouquette/obsidian-vps-publish/commit/066ac2b))
+
+
+### BREAKING CHANGE
+
+* Session creation now accepts optional calloutStyles parameter
+
+## 3.1.0 (2025-12-03)
+
+* Merge branch 'fix/site-navigation-and-default' into release ([9495cbb](https://github.com/JoRouquette/obsidian-vps-publish/commit/9495cbb))
+* Merge branch 'hotfix/activate-pipeline' into release ([d681447](https://github.com/JoRouquette/obsidian-vps-publish/commit/d681447))
+* Merge branch 'hotfix/fix-tests' ([374bcd0](https://github.com/JoRouquette/obsidian-vps-publish/commit/374bcd0))
+* Merge branch 'release' ([3ff7a7e](https://github.com/JoRouquette/obsidian-vps-publish/commit/3ff7a7e))
+* test: fix localStorage mock in http-manifest-repository tests ([db7d5fa](https://github.com/JoRouquette/obsidian-vps-publish/commit/db7d5fa))
+* refactor: asset style and display ([5d06f4c](https://github.com/JoRouquette/obsidian-vps-publish/commit/5d06f4c))
+* refactor: filter empty frontmatter values from rendering ([85cb15c](https://github.com/JoRouquette/obsidian-vps-publish/commit/85cb15c))
+* refactor: normalize frontmatter consistently and handle DomainFrontmatter input ([5468784](https://github.com/JoRouquette/obsidian-vps-publish/commit/5468784))
+* feat: detect and render assets and wikilinks from frontmatter ([19aa1e6](https://github.com/JoRouquette/obsidian-vps-publish/commit/19aa1e6))
+* feat: improve asset rendering, progress, and ignore rules UI ([705e811](https://github.com/JoRouquette/obsidian-vps-publish/commit/705e811))
+* feat: improve asset resolution and frontmatter sanitization ([8beb38e](https://github.com/JoRouquette/obsidian-vps-publish/commit/8beb38e))
+* feat(site): add reusable search bar and improve index rendering ([01da2c0](https://github.com/JoRouquette/obsidian-vps-publish/commit/01da2c0))
+
 ## <small>3.0.2 (2025-11-27)</small>
 
 * Merge branch 'hotfix/activate-pipeline' ([c9f5d84](https://github.com/JoRouquette/obsidian-vps-publish/commit/c9f5d84))
