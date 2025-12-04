@@ -1,3 +1,20 @@
+## 3.2.0 (2025-12-04)
+
+* Merge branch 'feature/abstracts-and-styles' into release ([efbbb85](https://github.com/JoRouquette/obsidian-vps-publish/commit/efbbb85))
+* Merge branch 'hotfix/fix-tests' into release ([9621ab1](https://github.com/JoRouquette/obsidian-vps-publish/commit/9621ab1))
+* Merge branch 'release' ([9c8c037](https://github.com/JoRouquette/obsidian-vps-publish/commit/9c8c037))
+* ci: add tasks ([6b11374](https://github.com/JoRouquette/obsidian-vps-publish/commit/6b11374))
+* chore: format all files ([e7f9b9d](https://github.com/JoRouquette/obsidian-vps-publish/commit/e7f9b9d))
+* fix: resolve wikilinks against full session batch for accurate cross-references ([21be6d1](https://github.com/JoRouquette/obsidian-vps-publish/commit/21be6d1))
+* fix(callouts): replace text icons with Material Symbols and improve styling ([66b1840](https://github.com/JoRouquette/obsidian-vps-publish/commit/66b1840))
+* feat: add callouts ([526f84f](https://github.com/JoRouquette/obsidian-vps-publish/commit/526f84f))
+* feat: add custom callout styles support ([066ac2b](https://github.com/JoRouquette/obsidian-vps-publish/commit/066ac2b))
+
+
+### BREAKING CHANGE
+
+* Session creation now accepts optional calloutStyles parameter
+
 ## 3.1.0 (2025-12-03)
 
 * Merge branch 'fix/site-navigation-and-default' into release ([9495cbb](https://github.com/JoRouquette/obsidian-vps-publish/commit/9495cbb))
