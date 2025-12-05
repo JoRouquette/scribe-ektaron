@@ -64,7 +64,7 @@ export function createApp(rootLogger?: LoggerPort) {
   );
 
   // Log app startup and config
-  rootLogger?.info('Initializing Express app', {
+  rootLogger?.debug('Initializing Express app', {
     assetsRoot: EnvConfig.assetsRoot(),
     contentRoot: EnvConfig.contentRoot(),
     uiRoot: EnvConfig.uiRoot(),
@@ -141,7 +141,7 @@ export function createApp(rootLogger?: LoggerPort) {
 
   // Log each incoming request
   app.use((req, res, next) => {
-    rootLogger?.info(
+    rootLogger?.debug(
       `Incoming request received method: ${req.method}, url: ${req.originalUrl}, ip: ${req.ip}`
     );
     next();
@@ -150,7 +150,7 @@ export function createApp(rootLogger?: LoggerPort) {
   app.use(createHealthCheckController());
 
   app.get('/public-config', (req, res) => {
-    rootLogger?.info('Serving public config');
+    rootLogger?.debug('Serving public config');
     res.json({
       siteName: EnvConfig.siteName(),
       author: EnvConfig.author(),
@@ -160,7 +160,7 @@ export function createApp(rootLogger?: LoggerPort) {
   });
 
   app.get('*', (req, res) => {
-    rootLogger?.info('Serving Angular index.html for unmatched route', {
+    rootLogger?.debug('Serving Angular index.html for unmatched route', {
       url: req.originalUrl,
     });
 
@@ -169,7 +169,7 @@ export function createApp(rootLogger?: LoggerPort) {
   });
 
   // Log app ready
-  rootLogger?.info('Express app initialized');
+  rootLogger?.debug('Express app initialized');
 
   return { app, logger: rootLogger };
 }

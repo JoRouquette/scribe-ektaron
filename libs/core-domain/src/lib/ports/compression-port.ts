@@ -11,14 +11,14 @@ export interface CompressionPort {
    * @param level - Compression level (0-9)
    * @returns Compressed data as Uint8Array
    */
-  compress(data: string, level: number): Uint8Array;
+  compress(data: string, level: number): Promise<Uint8Array>;
 
   /**
    * Decompress gzip data
    * @param data - Compressed data
    * @returns Decompressed string
    */
-  decompress(data: Uint8Array): string;
+  decompress(data: Uint8Array): Promise<string>;
 }
 
 /**

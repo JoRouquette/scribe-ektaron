@@ -66,7 +66,7 @@ export class ChunkedUploadMiddleware {
       }
 
       // All chunks received - assemble and decompress
-      this.logger?.info('All chunks received, assembling', { uploadId });
+      this.logger?.debug('All chunks received, assembling', { uploadId });
 
       this.assembler
         .assembleAndDecompress(uploadId)
@@ -77,7 +77,7 @@ export class ChunkedUploadMiddleware {
           // Clean up chunk store
           this.assembler.deleteChunkStore(uploadId);
 
-          this.logger?.info('Upload reassembled successfully', { uploadId });
+          this.logger?.debug('Upload reassembled successfully', { uploadId });
 
           // Continue to next middleware with reconstructed data
           next();
@@ -97,6 +97,6 @@ export class ChunkedUploadMiddleware {
    */
   shutdown(): void {
     this.assembler.shutdown();
-    this.logger?.info('ChunkedUploadMiddleware shutdown complete');
+    this.logger?.debug('ChunkedUploadMiddleware shutdown complete');
   }
 }
