@@ -1,3 +1,26 @@
+## 4.0.0 (2025-12-05)
+
+* ci: fix linting issues ([fe5954b](https://github.com/JoRouquette/obsidian-vps-publish/commit/fe5954b))
+* ci: update obsidian-plugin-release job dependency ([16df570](https://github.com/JoRouquette/obsidian-vps-publish/commit/16df570))
+* Merge branch 'docs/better-readme' into release ([93b9ccf](https://github.com/JoRouquette/obsidian-vps-publish/commit/93b9ccf))
+* Merge branch 'fix/obsidian-publication-requirements' ([38c6e36](https://github.com/JoRouquette/obsidian-vps-publish/commit/38c6e36))
+* Merge branch 'fix/obsidian-publication-requirements' into release ([a7305f7](https://github.com/JoRouquette/obsidian-vps-publish/commit/a7305f7))
+* Merge branch 'fix/single-source-of-trust' into release ([af6c7dc](https://github.com/JoRouquette/obsidian-vps-publish/commit/af6c7dc))
+* Merge branch 'release' ([5d0b525](https://github.com/JoRouquette/obsidian-vps-publish/commit/5d0b525))
+* Merge branch 'release' ([91d3598](https://github.com/JoRouquette/obsidian-vps-publish/commit/91d3598))
+* refactor(settings)!: migrate to VPS-centric configuration model ([ce06f0b](https://github.com/JoRouquette/obsidian-vps-publish/commit/ce06f0b))
+* test: add ignoredCleanupRuleIds to FolderConfig test fixtures ([64cc363](https://github.com/JoRouquette/obsidian-vps-publish/commit/64cc363))
+* chore: add plugin compliance check and update documentation ([6ff1548](https://github.com/JoRouquette/obsidian-vps-publish/commit/6ff1548))
+* chore: migrate to ESLint flat config and sync version management ([04a6ffb](https://github.com/JoRouquette/obsidian-vps-publish/commit/04a6ffb))
+* chore: ssot for manifest and scripts to root ([7c1e20b](https://github.com/JoRouquette/obsidian-vps-publish/commit/7c1e20b))
+* chore: standardize plugin naming and improve documentation ([3a70dfc](https://github.com/JoRouquette/obsidian-vps-publish/commit/3a70dfc))
+
+
+### BREAKING CHANGE
+
+* Settings structure completely refactored. Each VPS now contains its own folders,
+ignore rules, and cleanup rules. Migration required for existing configurations.
+
 ## <small>3.2.2 (2025-12-04)</small>
 
 * Merge branch 'fix/frontmatter-properties' into release ([2fed1d9](https://github.com/JoRouquette/obsidian-vps-publish/commit/2fed1d9))
