@@ -3,6 +3,7 @@ const PLUGIN_ID = pluginManifest.id;
 
 module.exports = {
   branches: [{ name: 'main' }],
+  tagFormat: '${version}',
   plugins: [
     [
       '@semantic-release/commit-analyzer',

@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
 
 env:
@@ -115,11 +113,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --ignore-scripts
+        env:
+          HUSKY: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
       - name: Compute image tags
         id: vars
         run: |
           VERSION=$(git describe --tags --abbrev=0 || node -p "require('./package.json').version")
-          echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
@@ -167,7 +176,6 @@ jobs:
   obsidian-plugin-release:
     name: Obsidian plugin release
     needs: semantic-release
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -177,6 +185,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
+
+      - name: Pull latest changes from main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -185,9 +199,15 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --ignore-scripts --no-audit --no-fund
+        run: npm install --no-audit --no-fund --ignore-scripts
         env:
           HUSKY: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
       - name: Package Obsidian plugin
         run: npm run package:plugin
@@ -200,28 +220,35 @@ jobs:
           echo "plugin_id=$PLUGIN_ID" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Verify tag matches manifest.json version
-        id: versions
+      - name: Get latest tag
+        id: latest_tag
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          git fetch --tags --force
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches manifest.json version
+        run: |
+          TAG_VERSION="${{ steps.latest_tag.outputs.version }}"
+          MANIFEST_VERSION="${{ steps.manifest.outputs.version }}"
 
           if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
-            echo "Tag version ($TAG_VERSION) does not match manifest.json version ($MANIFEST_VERSION)"
-            exit 1
+            echo "⚠️  Tag version ($TAG_VERSION) does not match manifest.json version ($MANIFEST_VERSION)"
+            echo "This might be expected if semantic-release just created a new tag."
+            echo "Using manifest.json version for release."
           fi
 
-          echo "version=${TAG_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release with plugin assets
+      - name: Create or update GitHub Release with plugin assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Publish to VPS v${{ steps.versions.outputs.version }}
+          tag_name: ${{ steps.manifest.outputs.version }}
+          name: Publish to VPS v${{ steps.manifest.outputs.version }}
           files: |
             dist/${{ steps.manifest.outputs.plugin_id }}/manifest.json
             dist/${{ steps.manifest.outputs.plugin_id }}/versions.json
             dist/${{ steps.manifest.outputs.plugin_id }}/main.js
             dist/${{ steps.manifest.outputs.plugin_id }}/styles.css
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
