@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import type { ManifestPage } from '@core-domain';
+import { humanizePropertyKey } from '@core-domain/utils/string.utils';
 import { filter } from 'rxjs/operators';
 
 import { CatalogFacade } from '../../application/facades/catalog-facade';
@@ -100,9 +101,10 @@ export class ShellComponent implements OnInit {
     this._crumbs = parts.map((seg, i) => {
       const partial = this.normalizeRoute('/' + parts.slice(0, i + 1).join('/'));
       const page = this.findPageForRoute(partial);
+      const decodedSeg = decodeURIComponent(seg);
       return {
         url: page?.route ?? partial,
-        label: page?.title ?? decodeURIComponent(seg),
+        label: page?.title ?? humanizePropertyKey(decodedSeg),
       };
     });
 
