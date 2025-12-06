@@ -17,7 +17,7 @@ module.exports = {
           { type: 'refactor', release: 'patch' },
           { type: 'build', release: false },
           { type: 'ci', release: false },
-          { type: 'docs', release: false },
+          { type: 'docs', scope: 'readme', release: 'patch' },
           { type: 'style', release: false },
           { type: 'test', release: false },
           { type: 'chore', release: false },
