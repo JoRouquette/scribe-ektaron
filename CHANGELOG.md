@@ -1,3 +1,10 @@
+## <small>4.1.2 (2025-12-06)</small>
+
+* Merge branch 'fix/nanoid-issues' into release ([64e8303](https://github.com/JoRouquette/obsidian-vps-publish/commit/64e8303))
+* Merge branch 'release' ([1145180](https://github.com/JoRouquette/obsidian-vps-publish/commit/1145180))
+* fix: replace nanoid with guid generator port ([a6dcfaf](https://github.com/JoRouquette/obsidian-vps-publish/commit/a6dcfaf))
+* build(docker): simplify user configuration by using existing node user ([1bea73c](https://github.com/JoRouquette/obsidian-vps-publish/commit/1bea73c))
+
 ## <small>4.1.1 (2025-12-06)</small>
 
 * refactor(docker): use existing node group instead of creating nodegrp ([7c63517](https://github.com/JoRouquette/obsidian-vps-publish/commit/7c63517))
