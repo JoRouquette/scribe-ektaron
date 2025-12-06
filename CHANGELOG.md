@@ -1,3 +1,20 @@
+## 4.1.0 (2025-12-06)
+
+* Merge branch 'fix/overhall-upload' into release ([63fc892](https://github.com/JoRouquette/obsidian-vps-publish/commit/63fc892))
+* Merge branch 'release' ([26b9182](https://github.com/JoRouquette/obsidian-vps-publish/commit/26b9182))
+* Merge branch 'release' ([fa673e3](https://github.com/JoRouquette/obsidian-vps-publish/commit/fa673e3))
+* refactor: replace console.info with console.debug and improve logging consistency ([2a6fdea](https://github.com/JoRouquette/obsidian-vps-publish/commit/2a6fdea))
+* feat(upload): implement chunked compression system for large uploads ([39a80ce](https://github.com/JoRouquette/obsidian-vps-publish/commit/39a80ce))
+* fix(upload): handle oversized items and improve batch upload reliability ([736fe20](https://github.com/JoRouquette/obsidian-vps-publish/commit/736fe20))
+* ci: add individual plugin files to release assets ([8bf7ad8](https://github.com/JoRouquette/obsidian-vps-publish/commit/8bf7ad8))
+* ci: remove tag-based trigger and add version sync for plugin release ([4e03035](https://github.com/JoRouquette/obsidian-vps-publish/commit/4e03035))
+* ci(release): bundle plugin into a ZIP file ([6ff811b](https://github.com/JoRouquette/obsidian-vps-publish/commit/6ff811b))
+
+
+### BREAKING CHANGE
+
+* batchByBytes now returns {batches, oversized} instead of batches array
+
 ## 4.0.0 (2025-12-05)
 
 * ci: fix linting issues ([fe5954b](https://github.com/JoRouquette/obsidian-vps-publish/commit/fe5954b))
