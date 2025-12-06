@@ -44,8 +44,8 @@ RUN apk add --no-cache wget
 WORKDIR /app
 
 # User non-root avec UID/GID fixes pour compatibilité avec les volumes montés
-RUN addgroup -g 1000 nodegrp \
-    && adduser -u 1000 -S -D -h /app -G nodegrp nodeusr
+# Note: le groupe 'node' (GID 1000) existe déjà dans l'image node:alpine
+RUN adduser -u 1000 -S -D -h /app -G node nodeusr
 
 ################################
 #   INSTALL DEPENDANCES RUNTIME
@@ -91,7 +91,7 @@ RUN set -eux; \
 #   CONTENT / ASSETS           #
 ################################
 RUN mkdir -p "${CONTENT_ROOT}" "${ASSETS_ROOT}" \
-    && chown -R nodeusr:nodegrp "${CONTENT_ROOT}" "${ASSETS_ROOT}" "${UI_ROOT}"
+    && chown -R nodeusr:node "${CONTENT_ROOT}" "${ASSETS_ROOT}" "${UI_ROOT}"
 
 # Optionnel : on vire les sourcemaps Angular en prod
 RUN find "${UI_ROOT}" -type f -name "*.map" -delete || true
